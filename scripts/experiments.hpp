@@ -26,6 +26,12 @@ void demo(
     std::shared_ptr<Perception>& perception,
     ros::NodeHandle nodeHandle);
 
+void brandonDemo(
+    FeedingDemo& feedingDemo,
+    std::shared_ptr<Perception>& perception,
+    ros::NodeHandle nodeHandle);
+
+
 void humanStudyDemo(
     FeedingDemo& feedingDemo,
     std::shared_ptr<Perception>& perception,
@@ -36,5 +42,8 @@ void spanetDemo(
     std::shared_ptr<Perception>& perception,
     ros::NodeHandle nodeHandle);
 };
+
+
+
 
 #endif

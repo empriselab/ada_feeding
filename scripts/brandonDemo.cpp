@@ -12,6 +12,7 @@
 #include "feeding/action/MoveAbove.hpp"
 #include "feeding/action/MoveInFrontOfPerson.hpp"
 #include "feeding/action/MoveDirectlyToPerson.hpp"
+#include "feeding/action/CutAndScoop.hpp"
 #include <cstdlib>
 #include <ctime>
 
@@ -20,13 +21,13 @@ using ada::util::waitForUser;
 
 namespace feeding {
 
-void demo(
+void brandonDemo(
     FeedingDemo& feedingDemo,
     std::shared_ptr<Perception>& perception,
     ros::NodeHandle nodeHandle)
 {
 
-  ROS_INFO_STREAM("==========  DEMO ==========");
+  ROS_INFO_STREAM("==========  BRANDON DEMO ========== ");
 
   auto workspace = feedingDemo.getWorkspace();
   auto plate = workspace->getPlate()->getRootBodyNode()->getWorldTransform();
@@ -55,33 +56,9 @@ void demo(
     ROS_INFO_STREAM("Running bite transfer study for " << foodName);
 
 
-    // switch((rand() % 10)) {
-    //     case 0:
-    //     talk("Good choice!");
-    //     break;
-    //     case 1:
-    //     talk(std::string("Great! I love ") + foodName + std::string("'s!"));
-    //     break;
-    //     case 2:
-    //     talk("Sounds delicious. I wish I had taste buds.");
-    //     break;
-    //     case 4:
-    //     talk("Roger Roger.");
-    //     break;
-    //     case 5:
-    //     talk("Nothing beats fresh fruit.");
-    //     break;
-    //     case 6:
-    //     talk("Nothing escapes my fork!");
-    //     break;
-    //     case 7:
-    //     talk("Thanks Alexa!");
-    //     break;
-    //     default:
-    //     talk("Alright.");
-    // }
 
     talk(std::string("One ") + foodName + std::string(" coming right up!"), true);
+
 
     // ===== FORQUE PICKUP =====
     if (foodName == "pickupfork")
@@ -100,35 +77,37 @@ void demo(
     }
     else
     {
-      bool skewer = action::skewer(
+
+      bool cutAndScoop = action::cutAndScoop(
         perception,
         foodName,
         plate,
         feedingDemo.getPlateEndEffectorTransform(),
         &feedingDemo);
 
-      if (feedingDemo.getFTThresholdHelper())
-        feedingDemo.getFTThresholdHelper()->setThresholds(STANDARD_FT_THRESHOLD);
+      // if (feedingDemo.getFTThresholdHelper())
+      //   feedingDemo.getFTThresholdHelper()->setThresholds(STANDARD_FT_THRESHOLD);
 
-      if (!skewer)
-      {
-        ROS_WARN_STREAM("Restart from the beginning");
-        continue;
-      }
+      // if (!skewer)
+      // {
+      //   ROS_WARN_STREAM("Restart from the beginning");
+      //   continue;
+      // }
 
-      // ===== IN FRONT OF PERSON =====
-      ROS_INFO_STREAM("Move forque in front of person");
+      // // ===== IN FRONT OF PERSON =====
+      // ROS_INFO_STREAM("Move forque in front of person");
 
-      auto tiltFoods = feedingDemo.mTiltFoodNames;
-      bool tilted = (std::find(tiltFoods.begin(), tiltFoods.end(), foodName) != tiltFoods.end());
+      // auto tiltFoods = feedingDemo.mTiltFoodNames;
+      // bool tilted = (std::find(tiltFoods.begin(), tiltFoods.end(), foodName) != tiltFoods.end());
 
-      action::feedFoodToPerson(
-        perception,
-        plate,
-        feedingDemo.getPlateEndEffectorTransform(),
-        tilted ? &feedingDemo.mTiltOffset : nullptr,
-        &feedingDemo
-        );
+      // action::feedFoodToPerson(
+      //   perception,
+      //   plate,
+      //   feedingDemo.getPlateEndEffectorTransform(),
+      //   tilted ? &feedingDemo.mTiltOffset : nullptr,
+      //   &feedingDemo
+      //   );
+
     }
   }
 

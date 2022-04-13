@@ -77,6 +77,7 @@ add_executable(feeding
   scripts/demo.cpp
   scripts/humanStudy.cpp
   scripts/spanetDemo.cpp
+  scripts/brandonDemo.cpp
   src/AcquisitionAction.cpp
   src/FoodItem.cpp
   src/FeedingDemo.cpp
@@ -84,6 +85,9 @@ add_executable(feeding
   src/Workspace.cpp
   src/util.cpp
   src/action/Grab.cpp
+  src/action/Cut.cpp
+  src/action/Scoop.cpp
+  src/action/CutAndScoop.cpp
   src/action/DetectAndMoveAboveFood.cpp
   src/action/FeedFoodToPerson.cpp
   src/action/MoveAbove.cpp
@@ -98,6 +102,7 @@ add_executable(feeding
   src/action/PickUpFork.cpp
   src/action/PutDownFork.cpp
   src/action/Skewer.cpp
+  src/action/Push.cpp
   src/perception/Perception.cpp
   src/perception/PerceptionServoClient.cpp
   src/ranker/ShortestDistanceRanker.cpp

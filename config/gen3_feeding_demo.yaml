@@ -34,10 +34,10 @@ af_named_configs: package://ada_feeding/config/named_configs_gen3_6dof.yaml
 # TODO: modify other poses based on new dimensions and poses for the plate and table?
 plate:
   urdfUri: package://pr_assets/data/objects/plate.urdf
-  pose: [.445, 0.19, -0.045, 0, 0, 0]
+  pose: [.445, 0.23, -0.045, 0, 0, 0]
 table:
   urdfUri: package://pr_assets/data/furniture/emprise_table_feeding.urdf
-  pose: [0.76, 0.5, -0.765, 0, 0, 0]
+  pose: [0.76, 0.54, -0.765, 0, 0, 0]
 defaultFoodItem:
   urdfUri: package://pr_assets/data/objects/food_item.urdf
   pose: [.445, 0.19, -0.045, 3.1415, 0, 0]

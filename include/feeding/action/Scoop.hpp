@@ -5,11 +5,16 @@
 
 #include "feeding/Workspace.hpp"
 
+#include "feeding/action/MoveAbovePlate.hpp"
+
+#include "feeding/action/MoveAbove.hpp"
+
 namespace feeding {
 namespace action {
 
-void scoop(const std::shared_ptr<ada::Ada> &ada);
-}
+bool scoop(FeedingDemo *feedingDemo);
+
+} // namespace action
 } // namespace feeding
 
 #endif

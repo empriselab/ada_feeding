@@ -148,6 +148,8 @@ int main(int argc, char** argv)
   // Init ROS topics
   initTopics(nodeHandle.get());
 
+
+  demoType = "brandonDemo";
   // Start Demo
   if (demoType == "spanet")
   {
@@ -156,6 +158,9 @@ int main(int argc, char** argv)
   else if (demoType == "humanStudy")
   {
     humanStudyDemo(*feedingDemo, perception, nodeHandle);
+  }
+  else if (demoType == "brandonDemo"){
+    brandonDemo(*feedingDemo, perception, *nodeHandle);
   }
   else
   {
