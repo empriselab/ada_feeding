@@ -20,6 +20,7 @@ bool moveAbovePlate(const Eigen::Isometry3d &plate,
   // was never used. double rotationTolerance =
   // feedingDemo->mPlateTSRParameters.at("rotationTolerance");
       ROS_INFO_STREAM("Home config cutting");
+      ROS_INFO_STREAM(ada->getArm()->getNamedConfiguration("home_config_cutting"));
   auto trajectory = ada->getArm()->planToConfiguration(
       ada->getArm()->getNamedConfiguration("home_config_cutting"),
       ada->getArm()->getWorldCollisionConstraint());

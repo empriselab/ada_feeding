@@ -47,12 +47,7 @@ bool moveAbove(const Eigen::Isometry3d &targetTransform,
     auto targetPtr = std::make_shared<aikido::constraint::dart::TSR>(target);
     auto trajectory = ada->getArm()->planToTSR(
         ada->getEndEffectorBodyNode()->getName(), targetPtr,
-        ada->getArm()->getWorldCollisionConstraint(),
-        aikido::robot::util::PlanToTSRParameters(
-          maxNumTrials,
-          batchSize,
-          maxNumBatches,
-          numMaxIterations));
+        ada->getArm()->getWorldCollisionConstraint());
 
     //  ada->getArm()->getWorldCollisionConstraint());
     bool success = true;

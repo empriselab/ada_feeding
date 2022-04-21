@@ -43,7 +43,11 @@ FeedingDemo::FeedingDemo(bool adaReal,
                                           ? "move_until_touch_topic_controller"
                                           : "rewd_trajectory_controller";
 
-  mAda = std::make_shared<ada::Ada>(!mAdaReal, mWorld);
+  mAda = std::make_shared<ada::Ada>(
+      !mAdaReal,
+      getRosParam<std::string>("/ada/urdfUri", *mNodeHandle),
+      getRosParam<std::string>("/ada/srdfUri", *mNodeHandle),
+      mWorld);
   // mArmSpace = mAda->getArm()->getStateSpace();
 
   Eigen::Isometry3d robotPose = createIsometry(

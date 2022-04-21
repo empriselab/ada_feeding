@@ -14,7 +14,7 @@ namespace action {
 
 bool moveFork(const std::shared_ptr<Perception> &perception, TargetItem item,
               const Eigen::Vector3d &endEffectorDirection, const Eigen::Vector3d &moveDir,
-              FeedingDemo *feedingDemo) {
+              FeedingDemo *feedingDemo, std::string controller = "move_until_touch_topic_controller") {
   // Load necessary parameters from feedingDemo
   const std::shared_ptr<::ada::Ada> &ada = feedingDemo->getAda();
   const ros::NodeHandle *nodeHandle = feedingDemo->getNodeHandle().get();
@@ -36,31 +36,20 @@ bool moveFork(const std::shared_ptr<Perception> &perception, TargetItem item,
     throw std::invalid_argument("MoveInto[" + TargetToString.at(item) +
                                 "] not supported");
 
-  if (item == TargetItem::FORQUE) {
-    auto trajectory = ada->planToOffset(
-        ada->getEndEffectorBodyNode()->getName(), Eigen::Vector3d(0, 0.01, 0),
-        ada->getArm()->getWorldCollisionConstraint());
-
-    bool success = true;
-    auto future = ada->getArm()->executeTrajectory(
-        trajectory); // check velocity limits are set in FeedingDemo
-    try {
-      future.get();
-    } catch (const std::exception &e) {
-      dtwarn << "Exception in trajectoryExecution: " << e.what() << std::endl;
-      success = false;
-    }
-    if (!success)
-      throw std::runtime_error("Trajectory execution failed");
+  if (controller.compare("move_until_touch_topic_controller")!=0){
+    ada->switchControllers(
+      std::vector<std::string> {controller}, 
+      std::vector<std::string> {"move_until_touch_topic_controller"}
+    );
   }
 
   std::cout << "endEffectorDirection " << endEffectorDirection.transpose()
             << std::endl;
-  // int n;
-  // std::cin >> n;
+
   {
     int numDofs = ada->getArm()->getMetaSkeleton()->getNumDofs();
     // Collision constraint is not set because f/t sensor stops execution.
+    // movedir is amount to move by
     auto trajectory =
         ada->getArm()->planToOffset(ada->getEndEffectorBodyNode()->getName(),
                                     moveDir);
@@ -74,6 +63,13 @@ bool moveFork(const std::shared_ptr<Perception> &perception, TargetItem item,
       dtwarn << "Exception in trajectoryExecution: " << e.what() << std::endl;
       success = false;
     }
+  }
+
+  if (controller.compare("move_until_touch_topic_controller")!=0){
+    ada->switchControllers(
+      std::vector<std::string> {"move_until_touch_topic_controller"}, 
+      std::vector<std::string> {controller}
+    );
   }
 
   return true;

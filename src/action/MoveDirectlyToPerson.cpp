@@ -81,12 +81,7 @@ bool moveDirectlyToPerson(const Eigen::Isometry3d &personPose,
       std::make_shared<aikido::constraint::dart::TSR>(personTSR);
   auto trajectory = ada->getArm()->planToTSR(
       ada->getEndEffectorBodyNode()->getName(), personTSRPtr,
-      ada->getArm()->getWorldCollisionConstraint(),
-      aikido::robot::util::PlanToTSRParameters(
-        maxNumTrials,
-        batchSize,
-        maxNumBatches,
-        numMaxIterations));
+      ada->getArm()->getWorldCollisionConstraint());
   bool success = true;
   auto future = ada->getArm()->executeTrajectory(
       trajectory); // check velocity limits are set in FeedingDemo

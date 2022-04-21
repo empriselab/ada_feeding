@@ -55,21 +55,41 @@ bool cutAndScoop(const std::shared_ptr<Perception> &perception,
   ROS_INFO_STREAM("Move above plate");
   bool abovePlaceSuccess =
       moveAbovePlate(plate, plateEndEffectorTransform, feedingDemo);
+ 
+
+  // Angle the fork in the correct cutting position. Fork base position is at 90, can move by +-90 degrees
+    // Move to where to make the cut
+    Eigen::Vector3d endEffectorDirection(1, 1, 0);
+    bool positionSuccess = moveFork(perception, TargetItem::FOOD,
+                                    endEffectorDirection, 
+                                    Eigen::Vector3d(-0.02, -0.02, 0),feedingDemo,
+                                    "move_until_touch_topic_controller");
+
+    
+
+  int isLeft = 1;
+
+  if (isLeft == -1){
+      bool rotateFork = scoop(feedingDemo, 3.14);
+  }
   
-  Eigen::Vector3d endEffectorDirection(0, 0, -5);
+  endEffectorDirection = Eigen::Vector3d(0,0,-5);
   ROS_INFO_STREAM("Cut");
   bool cutSuccess = moveFork(perception, TargetItem::FOOD,
                                     endEffectorDirection, 
-                                    Eigen::Vector3d(0., 0., -0.3),feedingDemo);
+                                    Eigen::Vector3d(0., 0., -0.11),feedingDemo,
+                                    "move_until_touch_topic_controller");
 
-  endEffectorDirection = Eigen::Vector3d(1, 0, 0);
+  
+  endEffectorDirection = Eigen::Vector3d(5 , 0, 0) ;
   ROS_INFO_STREAM("Push Fork");
   bool pushSuccess = moveFork(perception, TargetItem::FOOD,
                                     endEffectorDirection, 
-                                    Eigen::Vector3d(0.05, 0., 0.),feedingDemo);
+                                    Eigen::Vector3d(0.05*isLeft, 0., 0.),feedingDemo,
+                                    "move_until_touch_topic_controller");
 
   ROS_INFO_STREAM("Scoop hello");
-  bool scoopSuccess = scoop(feedingDemo);
+  bool scoopSuccess = scoop(feedingDemo, -1.57*isLeft);
 
 
 

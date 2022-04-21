@@ -14,7 +14,7 @@ namespace action {
 
 
 
-bool scoop(FeedingDemo *feedingDemo){
+bool scoop(FeedingDemo *feedingDemo, double angle){
   const std::shared_ptr<::ada::Ada> &ada = feedingDemo->getAda();
   const aikido::constraint::dart::CollisionFreePtr &collisionFree =
       feedingDemo->getCollisionConstraint();
@@ -30,7 +30,7 @@ bool scoop(FeedingDemo *feedingDemo){
   // , so we subtract by 90 and convert to radians)
   std::stringstream prev;
   prev << currentPose;
-  currentPose[5] = currentPose[5]-1.57;
+  currentPose[5] = currentPose[5]+angle;
 
   ROS_INFO_STREAM("Hello");
   std::stringstream ss;

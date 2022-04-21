@@ -12,8 +12,8 @@
 namespace feeding {
 namespace action {
 
-bool scoop(FeedingDemo *feedingDemo);
-
+bool scoop(FeedingDemo *feedingDemo, double angle);
+// angle is the degree to rotate the 6th motor by
 } // namespace action
 } // namespace feeding
 

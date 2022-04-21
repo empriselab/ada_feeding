@@ -15,7 +15,7 @@ namespace action {
 
 bool moveFork(const std::shared_ptr<Perception> &perception, TargetItem item,
               const Eigen::Vector3d &endEffectorDirection, const Eigen::Vector3d &moveDir,
-              FeedingDemo *feedingDemo);
+              FeedingDemo *feedingDemo,std::string controller);
 
 } // namespace action
 } // namespace feeding
