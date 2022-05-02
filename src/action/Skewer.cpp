@@ -144,6 +144,7 @@ bool skewer(const std::shared_ptr<Perception> &perception,
           // Assume 90-degree action
           actionNum++;
         }
+        ROS_INFO_STREAM("detected and moving above food");
         // Call here so we don't overwrite features
         Eigen::Vector3d foodVec =
             item->getPose().rotation() * Eigen::Vector3d::UnitX();

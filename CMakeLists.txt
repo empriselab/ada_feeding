@@ -99,6 +99,7 @@ add_executable(feeding
   src/action/MoveInto.cpp
   src/action/MoveOutOf.cpp
   src/action/MoveTowardsPerson.cpp
+  src/action/PositionFork.cpp
   src/action/PickUpFork.cpp
   src/action/PutDownFork.cpp
   src/action/Skewer.cpp

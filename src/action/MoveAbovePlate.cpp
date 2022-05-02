@@ -7,7 +7,7 @@ namespace action {
 
 bool moveAbovePlate(const Eigen::Isometry3d &plate,
                     const Eigen::Isometry3d &plateEndEffectorTransform,
-                    FeedingDemo *feedingDemo) {
+                    FeedingDemo *feedingDemo, std::string config) {
   // Load necessary parameters from feedingDemo
   const std::shared_ptr<::ada::Ada> &ada = feedingDemo->getAda();
   const aikido::constraint::dart::CollisionFreePtr &collisionFree =
@@ -19,10 +19,10 @@ bool moveAbovePlate(const Eigen::Isometry3d &plate,
   // NOTE: Although rotationTolerance was originally passed in as a param, it
   // was never used. double rotationTolerance =
   // feedingDemo->mPlateTSRParameters.at("rotationTolerance");
-      ROS_INFO_STREAM("Home config cutting");
+      
       ROS_INFO_STREAM(ada->getArm()->getNamedConfiguration("home_config_cutting"));
   auto trajectory = ada->getArm()->planToConfiguration(
-      ada->getArm()->getNamedConfiguration("home_config_cutting"),
+      ada->getArm()->getNamedConfiguration(config),
       ada->getArm()->getWorldCollisionConstraint());
   bool success = true;
   auto future = ada->getArm()->executeTrajectory(

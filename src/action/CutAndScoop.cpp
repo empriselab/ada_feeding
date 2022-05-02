@@ -12,7 +12,7 @@
 #include "feeding/action/Push.hpp"
 #include "feeding/action/Cut.hpp"
 #include "feeding/action/Scoop.hpp"
-
+#include "feeding/action/PositionFork.hpp"
 
 using ada::util::getRosParam;
 
@@ -51,22 +51,30 @@ bool cutAndScoop(const std::shared_ptr<Perception> &perception,
   if (feedingDemo->mPickUpAngleModes.count(foodName)) {
     actionOverride = feedingDemo->mPickUpAngleModes[foodName];
   }
-
+ROS_INFO_STREAM("Home config cutting");
   ROS_INFO_STREAM("Move above plate");
   bool abovePlaceSuccess =
-      moveAbovePlate(plate, plateEndEffectorTransform, feedingDemo);
- 
-
+      moveAbovePlate(plate, plateEndEffectorTransform, feedingDemo, "home_config");
+    
+  detectAndMoveAboveFood(perception,
+                       foodName, 0.5,
+                       feedingDemo, nullptr,
+                       1) ;
+  // take picture function that takes a picture and returns cutting position, angle and push direction                       
+// bool vruh =
+//       moveAbovePlate(plate, plateEndEffectorTransform, feedingDemo, "home_config_cutting");
+ROS_INFO_STREAM("working");
   // Angle the fork in the correct cutting position. Fork base position is at 90, can move by +-90 degrees
     // Move to where to make the cut
     Eigen::Vector3d endEffectorDirection(1, 1, 0);
-    bool positionSuccess = moveFork(perception, TargetItem::FOOD,
-                                    endEffectorDirection, 
-                                    Eigen::Vector3d(-0.02, -0.02, 0),feedingDemo,
-                                    "move_until_touch_topic_controller");
+      
+    // We need perception, foodName, rotation
 
-    
-
+    //detectAndMoveAboveFood(perception, foodName, rotationToleranceForFood,
+                                 //feedingDemo, nullptr, actionOverride);
+    // what is actionOverride(angleguess)? what is rotationTolerance for food?
+    // define rotation tolerance by yourself
+    // action override is the guess of the angle
   int isLeft = 1;
 
   if (isLeft == -1){
@@ -79,8 +87,12 @@ bool cutAndScoop(const std::shared_ptr<Perception> &perception,
                                     endEffectorDirection, 
                                     Eigen::Vector3d(0., 0., -0.11),feedingDemo,
                                     "move_until_touch_topic_controller");
+//    moveFork(perception, TargetItem::FOOD,
+//                                     endEffectorDirection, 
+//                                     Eigen::Vector3d(0., 0., 0.03),feedingDemo,
+//                                     "move_until_touch_topic_controller");
 
-  
+
   endEffectorDirection = Eigen::Vector3d(5 , 0, 0) ;
   ROS_INFO_STREAM("Push Fork");
   bool pushSuccess = moveFork(perception, TargetItem::FOOD,

@@ -10,7 +10,7 @@ namespace action {
 
 bool moveAbovePlate(const Eigen::Isometry3d &plate,
                     const Eigen::Isometry3d &plateEndEffectorTransform,
-                    FeedingDemo *feedingDemo);
+                    FeedingDemo *feedingDemo, std::string config= "home_config");
 
 } // namespace action
 } // namespace feeding

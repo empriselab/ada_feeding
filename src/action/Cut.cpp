@@ -36,16 +36,17 @@ bool moveFork(const std::shared_ptr<Perception> &perception, TargetItem item,
     throw std::invalid_argument("MoveInto[" + TargetToString.at(item) +
                                 "] not supported");
 
-  if (controller.compare("move_until_touch_topic_controller")!=0){
-    ada->switchControllers(
-      std::vector<std::string> {controller}, 
-      std::vector<std::string> {"move_until_touch_topic_controller"}
-    );
-  }
+  // if (controller.compare("move_until_touch_topic_controller")!=0){
+  //   ada->switchControllers(
+  //     std::vector<std::string> {controller}, 
+  //     std::vector<std::string> {"move_until_touch_topic_controller"}
+  //   );
+  // }
 
   std::cout << "endEffectorDirection " << endEffectorDirection.transpose()
             << std::endl;
 
+  std::cout <<"Hello"<< std::endl;
   {
     int numDofs = ada->getArm()->getMetaSkeleton()->getNumDofs();
     // Collision constraint is not set because f/t sensor stops execution.
@@ -65,12 +66,12 @@ bool moveFork(const std::shared_ptr<Perception> &perception, TargetItem item,
     }
   }
 
-  if (controller.compare("move_until_touch_topic_controller")!=0){
-    ada->switchControllers(
-      std::vector<std::string> {"move_until_touch_topic_controller"}, 
-      std::vector<std::string> {controller}
-    );
-  }
+  // if (controller.compare("move_until_touch_topic_controller")!=0){
+  //   ada->switchControllers(
+  //     std::vector<std::string> {"move_until_touch_topic_controller"}, 
+  //     std::vector<std::string> {controller}
+  //   );
+  // }
 
   return true;
 }
