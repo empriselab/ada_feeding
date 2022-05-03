@@ -15,7 +15,7 @@ using aikido::constraint::dart::TSR;
 // Contains motions which are mainly TSR actions
 namespace feeding {
 namespace action {
-Eigen::Matrix3d getRotMatrix(float rot_x, float rot_y, float rot_z){
+Eigen::Matrix3d getRotMatrix(float rot_x, float rot_y, double rot_z){
   Eigen::Matrix3d rot;
   rot_x = rot_x * PI/180; rot_y = rot_y * PI/180; rot_z = rot_z * PI/180;
   rot << cos(rot_z)*cos(rot_y),
@@ -102,7 +102,8 @@ bool moveAboveFood(std::string foodName, const Eigen::Isometry3d &foodTransform,
   // -60 in the x axis. z axis depends on food
   float x_rot = -60.;
   float y_rot = -15;
-  float z_rot = -25;
+  double z_rot = *angleGuess;
+  std::cout << "Angle guess is " << z_rot << std::endl;
   Eigen::Matrix3d rot2 = getRotMatrix(x_rot, y_rot, z_rot);
   //rot2 <<  0.97, 0.22, -0.13, 0., 0.5, 0.87, 0.26, -0.84, 0.48;
   target.linear() = rot2;
