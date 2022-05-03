@@ -55,10 +55,13 @@ ROS_INFO_STREAM("Home config cutting");
   ROS_INFO_STREAM("Move above plate");
   bool abovePlaceSuccess =
       moveAbovePlate(plate, plateEndEffectorTransform, feedingDemo, "home_config");
+
+  double z_rot = -.0;
+  double * zptr = &z_rot;
     // angle guess is the z axis
   detectAndMoveAboveFood(perception,
                        foodName, 0.5,
-                       feedingDemo, nullptr,
+                       feedingDemo, zptr,
                        1) ;
   // take picture function that takes a picture and returns cutting position, angle and push direction                       
 // bool vruh =
