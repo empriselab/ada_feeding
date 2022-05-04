@@ -15,18 +15,6 @@ using aikido::constraint::dart::TSR;
 // Contains motions which are mainly TSR actions
 namespace feeding {
 namespace action {
-Eigen::Matrix3d getRotMatrix(float rot_x, float rot_y, double rot_z){
-  Eigen::Matrix3d rot;
-  rot_x = rot_x * PI/180; rot_y = rot_y * PI/180; rot_z = rot_z * PI/180;
-  rot << cos(rot_z)*cos(rot_y),
-  cos(rot_z)*sin(rot_y)*sin(rot_x) - sin(rot_z)*cos(rot_x),
-  cos(rot_z)*sin(rot_y)*cos(rot_x) + sin(rot_z)*sin(rot_x),
-  sin(rot_z)*cos(rot_y),
-  sin(rot_z)*sin(rot_y)*sin(rot_x) + cos(rot_z)*cos(rot_x),
-  sin(rot_z)*sin(rot_y)*cos(rot_x) - cos(rot_z)*sin(rot_x),
-  -sin(rot_y), cos(rot_y) * sin(rot_x), cos(rot_y) * cos(rot_x);
-  return rot;
-}
 
 bool moveAboveFood(std::string foodName, const Eigen::Isometry3d &foodTransform,
                    float rotateAngle, TiltStyle tiltStyle,
@@ -95,8 +83,9 @@ bool moveAboveFood(std::string foodName, const Eigen::Isometry3d &foodTransform,
                           cos(M_PI * 0.25) * heightAboveFood * 0.9};
   }
   // What is foodTransform? The rotation matrix of food transform is identity
-  std::cout << "Target rotation " << target.linear()<< std::endl;
-  std::cout << "Hieght above food" <<  heightAboveFood << std::endl;
+
+  // hard coded translation is [0.3, -0.25, 0.235]
+  // std::cout << "eetransform translation"
   ROS_INFO_STREAM("Changing eetransform val");
   eeTransform.translation()[2] = 0.4;
   // -60 in the x axis. z axis depends on food
@@ -104,13 +93,13 @@ bool moveAboveFood(std::string foodName, const Eigen::Isometry3d &foodTransform,
   float y_rot = -15;
   double z_rot = *angleGuess;
   std::cout << "Angle guess is " << z_rot << std::endl;
-  Eigen::Matrix3d rot2 = getRotMatrix(x_rot, y_rot, z_rot);
-  //rot2 <<  0.97, 0.22, -0.13, 0., 0.5, 0.87, 0.26, -0.84, 0.48;
+  //Eigen::Matrix3d rot2 = getRotMatrix(x_rot, y_rot, z_rot);
+  Eigen::Matrix3d rot2;
+  rot2 <<  0.97, 0.22, -0.13, 0., 0.5, 0.87, 0.26, -0.84, 0.48;
   target.linear() = rot2;
   //target.translation()[0] = target.translation()[0]+0.1;
-  target.translation()[1] = target.translation()[1]-0.2;
-  Eigen::Matrix3d test = getRotMatrix(x_rot, y_rot, z_rot);
-  std::cout << "Testing getRotMatrix:\n" <<test << std::endl;
+  // target.translation()[1] = target.translation()[1];
+  
   auto retval =
       moveAbove(target, eeTransform, horizontalTolerance, verticalTolerance,
                 rotationTolerance, 0.0, feedingDemo);
@@ -121,3 +110,58 @@ bool moveAboveFood(std::string foodName, const Eigen::Isometry3d &foodTransform,
 
 } // namespace action
 } // namespace feeding
+/**
+std::cout << "eetransform " << eeTransform.translation() << std::endl;5
+
+Angle guess is -0
+Target rotation 
+ 0.97  0.22 -0.13
+    0   0.5  0.87
+ 0.26 -0.84  0.48
+Target translation
+  0.3
+-0.25
+0.235
+horizontal tolerance
+0.003
+vertical tolerance
+0.008
+rotation tolerance
+0.5
+eetransform 
+4.68204e-310
+4.68204e-310
+         0.4
+eetransform linear
+ 4.37114e-08           -1            0
+          -1 -4.37114e-08            0
+          -0            0           -1
+
+
+
+
+Target rotation 
+ 0.97  0.22 -0.13
+    0   0.5  0.87
+ 0.26 -0.84  0.48
+Target translation
+  0.3
+-0.25
+0.235
+horizontal tolerance
+0.003
+vertical tolerance
+0.008
+rotation tolerance
+0.5
+eetransform 
+  0
+  0
+0.4
+eetransform linear
+-1  0  0
+ 0  1  0
+ 0  0 -1
+
+
+ **/
