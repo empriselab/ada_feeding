@@ -6,13 +6,12 @@
 #include "feeding/FeedingDemo.hpp"
 #include "feeding/Workspace.hpp"
 
+
 namespace feeding {
 namespace action {
 
-void positionFork(std::string foodName, const Eigen::Isometry3d &foodTransform,
-                   float rotateAngle, TiltStyle tiltStyle,
-                   double rotationTolerance, FeedingDemo *feedingDemo,
-                   double *angleGuess);
+void positionFork(FeedingDemo *feedingDemo, float horizontalTolerance=0.003, 
+float verticalTolerance=0.008, float rotationTolerance=0.5);
 
 } // namespace action
 } // namespace feeding
