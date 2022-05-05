@@ -25,7 +25,7 @@ Eigen::Matrix3d getRotMatrix(float rot_x, float rot_y, double rot_z){
   return rot;
 }
 
-void positionFork(FeedingDemo *feedingDemo, float horizontalTolerance=0.003, 
+void positionFork(FeedingDemo *feedingDemo, double z_rot, float horizontalTolerance=0.003, 
 float verticalTolerance=0.008, float rotationTolerance=0.5){
   Eigen::Isometry3d target;
   Eigen::Isometry3d eeTransform;
@@ -35,9 +35,8 @@ float verticalTolerance=0.008, float rotationTolerance=0.5){
   target.translation()[2] = 0.235;
   float x_rot = -60.;
   float y_rot = -15;
-  double z_rot = 0;
   Eigen::Matrix3d rot2 = getRotMatrix(x_rot, y_rot, z_rot);
-  rot2 <<  0.97, 0.22, -0.13, 0., 0.5, 0.87, 0.26, -0.84, 0.48;
+  //rot2 <<  0.97, 0.22, -0.13, 0., 0.5, 0.87, 0.26, -0.84, 0.48;
   target.linear() = rot2;
   eeTransform.translation()[0] = 0.;
   eeTransform.translation()[1] = 0.;

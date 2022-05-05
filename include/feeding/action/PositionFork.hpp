@@ -10,7 +10,8 @@
 namespace feeding {
 namespace action {
 
-void positionFork(FeedingDemo *feedingDemo, float horizontalTolerance=0.003, 
+void positionFork(FeedingDemo *feedingDemo, double z_rot,
+ float horizontalTolerance=0.003, 
 float verticalTolerance=0.008, float rotationTolerance=0.5);
 
 } // namespace action

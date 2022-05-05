@@ -17,6 +17,8 @@
 #include "cut_finder/find_cut.h"
 
 #include <ros/topic.h>
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/core.hpp>
 #define PI 3.14159265
 
 using ada::util::getRosParam;
@@ -28,6 +30,21 @@ static const std::vector<std::string> actionPrompts{"(1) skewer", "(3) tilt",
 namespace feeding {
 namespace action {
 
+
+void getCut(sensor_msgs::ImageConstPtr imagePtr){
+  ros::NodeHandle n;
+  ros::ServiceClient client = n.serviceClient<cut_finder::find_cut>("find_cut");
+  cut_finder::find_cut srv;
+  srv.request.img = *imagePtr;
+  if (client.call(srv)){
+    ROS_INFO_STREAM("Called succesfully");
+    std::cout << srv.response.trans_x << "\n" << srv.response.rot << std::endl;
+  }
+  else{
+    ROS_ERROR("Could not call service find_cut");
+  }
+
+}
 //==============================================================================
 bool cutAndScoop(const std::shared_ptr<Perception> &perception,
             const std::string &foodName, const Eigen::Isometry3d &plate,
@@ -62,30 +79,38 @@ ROS_INFO_STREAM("Home config cutting");
       moveAbovePlate(plate, plateEndEffectorTransform, feedingDemo, "home_config");
 
   // Obtain camera info
+
   // sensor_msgs::ImageConstPtr info = 
   // ros::topic::waitForMessage<sensor_msgs::Image>(
   //   "/camera/color/image_raw"
   // );
   // sensor_msgs::ImageConstPtr info = "tmp";
-  // get_cut(info);
+  std::string fp = 
+  "/home/brandonman/food_cutting_ws/src/cut_finder/src/IMG-2333.jpg";
+  cv::Mat img = cv::imread(fp, cv::IMREAD_COLOR);
 
 
-  double z_rot = -.0;
+  cv_bridge::CvImage tmp;
+  tmp.header.stamp = ros::Time::now();
+  tmp.image = img;
+  tmp.encoding = "bgr8";
+  sensor_msgs::ImagePtr info = tmp.toImageMsg();
+  //sensor_msgs::ImageConstPtr info(new sensor_msgs::Image(img));
+
+  // Obtain cut position info
+  getCut(info);
+
+
+
+  double z_rot = 15.0;
   double * zptr = &z_rot;
     // angle guess is the z axis
-  positionFork(feedingDemo);
+  positionFork(feedingDemo, z_rot);
 
 
-  // detectAndMoveAboveFood(perception,
-  //                      foodName, 0.5,
-  //                      feedingDemo, zptr,
-  //                      1) ;
-  // take picture function that takes a picture and returns cutting position, angle and push direction                       
-// bool vruh =
-//       moveAbovePlate(plate, plateEndEffectorTransform, feedingDemo, "home_config_cutting");
+  
 ROS_INFO_STREAM("working");
-  // Angle the fork in the correct cutting position. Fork base position is at 90, can move by +-90 degrees
-    // Move to where to make the cut
+   // Move to where to make the cut
     Eigen::Vector3d endEffectorDirection(1, 1, 0);
       
     // We need perception, foodName, rotation
@@ -136,20 +161,7 @@ ROS_INFO_STREAM("working");
 
 }
 
-void getCut(sensor_msgs::ImageConstPtr imagePtr){
-  ros::NodeHandle n;
-  ros::ServiceClient client = n.serviceClient<cut_finder::find_cut>("find_cut");
-  cut_finder::find_cut srv;
-  srv.request.img = *imagePtr;
-  if (client.call(srv)){
-    ROS_INFO_STREAM("Called succesfully");
-    std::cout << srv.response.trans << "\n" << srv.response.rot << std::endl;
-  }
-  else{
-    ROS_ERROR("Could not call service find_cut");
-  }
 
-}
 
 
 
