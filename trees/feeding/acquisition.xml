@@ -1,0 +1,147 @@
+<root BTCPP_format="4" main_tree_to_execute="AcquisitionRoot">
+  <!-- Subtree Includes -->
+  <include path="./helpers.xml"/>
+
+  <!-- Acquisition-Only -->
+  <BehaviorTree ID="AcquisitionRoot">
+
+    <Sequence name="AcquisitionRootSeq">
+
+      <!-- Setup Workspace -->
+      <SubTree ID="ParamToWorld" obj_name="wheelchair" /> 
+      <SubTree ID="ParamToWorld" obj_name="table" /> 
+      <SubTree ID="ParamToWorld" obj_name="plate" />
+
+      <!-- Give Velocity Headroom -->
+      <RosGetVecD param="velocityLimits/standard" target="{vel_standard}" />
+      <AdaSetLimits velocity="{vel_standard}" />
+
+      <!-- Move Above Plate -->
+      <RosGetVecD param="configs/wheelchair/above_plate" target="{config}" />
+      <SubTree ID="MoveToConfig" config="{config}" worldCollision="{TRUE}" />
+
+      <!-- Ask for Food -->
+      <RetryUntilSuccessful num_attempts="-1">
+        <Sequence>
+          <RosSubString topic="food_request" target="{food_name}" />
+          <PerceiveFood name_filter="{food_name}" timeout="3" objects="{foods}" />
+        </Sequence>
+      </RetryUntilSuccessful>
+
+      <!-- Rank Foods Based on Distance to Fork -->
+      <RankDistance objects="{foods}" output="{food}" />
+
+      <!-- Action Selection -->
+      <Fallback name="ActionSelectionFallback">
+        <Sequence>
+          <!-- Load Action Library -->
+          <RosGetParam param="action_selection/actions" target="{library}" />
+          <RosSubI topic="action_select" target="{action_idx}" />
+          <AcquisitionGetAction library="{library}" index="{action_idx}" target="{action}" />
+        </Sequence>
+        <!-- Default Action -->
+        <AcquisitionDefaultAction target="{action}" />
+      </Fallback>
+
+      <!-- Acquisition -->
+      <SubTree ID="BiteAcquisition" food_name="{food_name}" food="{food}" action="{action}" />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Bite Acquisition -->
+  <BehaviorTree ID="BiteAcquisition">
+    <RetryUntilSuccessful num_attempts="3">
+      <Sequence name="AcquisitionSeq">
+        <AdaSetVFParams />
+        <!-- Scripting constants -->
+        <Script code=" TRUE:=true; FALSE:=false " />
+        <Script code=" X:=0; Y:=1; Z:=2; PI:=3.1415926535 " />
+
+        <!-- Try Redetect Foods -->
+        <ForceSuccess>
+          <Sequence>
+            <PerceiveFood name_filter="{food_name}" timeout="1" objects="{foods}" />
+            <RankDistance objects="{foods}" nearestTo="{food}" output="{food}" />
+          </Sequence>
+        </ForceSuccess>
+
+        <!-- Move Above -->
+        <SetFTThreshold preset="standard" />
+        <AcquisitionUnpackAction action="{action}" rotate_pref="{rotate}" />
+        <RosGetD param="move_into/overshoot" target="{overshoot}" default="0.0" />
+        <Fallback>
+          <!-- Normal -->
+          <Sequence>
+            <FrameFromObject object="{food}" align_idx="{Z}" rotate_aligned="{rotate}" frame="{food_frame}" />
+            <ConfigMoveAbove obj_transform="{food_frame}" action="{action}" overshoot="{overshoot}" orig_pos="{food_pos}" orig_quat="{food_quat}" pos="{pos}" quat="{quat}" bounds="{bounds}" />
+            <AdaPlanToPose orig_pos="{food_pos}" orig_quat="{food_quat}" pos="{pos}" quat="{quat}" bounds="{bounds}" worldCollision="{TRUE}" traj="{traj}" />
+          </Sequence>
+          <!-- Flipped -->
+          <Sequence>
+            <Script code=" rotate += PI " />
+            <FrameFromObject object="{food}" align_idx="{Z}" rotate_aligned="{rotate}" frame="{food_frame}" />
+            <ConfigMoveAbove obj_transform="{food_frame}" action="{action}" overshoot="{overshoot}" orig_pos="{food_pos}" orig_quat="{food_quat}" pos="{pos}" quat="{quat}" bounds="{bounds}" />
+            <AdaPlanToPose orig_pos="{food_pos}" orig_quat="{food_quat}" pos="{pos}" quat="{quat}" bounds="{bounds}" worldCollision="{TRUE}" traj="{traj}" />
+          </Sequence>
+          <!-- Yaw Agnostic -->
+          <Sequence>
+            <FrameFromObject object="{food}" align_idx="{Z}" rotate_aligned="{rotate}" frame="{food_frame}" />
+            <ConfigMoveAbove obj_transform="{food_frame}" action="{action}" overshoot="{overshoot}" yaw_agnostic="{TRUE}" orig_pos="{food_pos}" orig_quat="{food_quat}" pos="{pos}" quat="{quat}" bounds="{bounds}" />
+            <AdaPlanToPose orig_pos="{food_pos}" orig_quat="{food_quat}" pos="{pos}" quat="{quat}" bounds="{bounds}" worldCollision="{TRUE}" traj="{traj}" />
+          </Sequence>
+        </Fallback>
+
+        <!-- MOVE ABOVE IS HERE-->
+        <AdaExecuteTrajectory name="MoveAbove" traj="{traj}" />
+        <!-- TODO (low-pri): add above logic to entire action by simulating action -->
+
+        <!-- Try Redetect Foods -->
+        <!--
+        <ForceSuccess>
+          <Sequence>
+            <PerceiveFood name_filter="{food_name}" timeout="1" objects="{foods}" />
+            <RankDistance objects="{foods}" nearestTo="{food}" output="{food}" />
+          </Sequence>
+        </ForceSuccess>
+        -->
+
+        <!-- Move Into -->
+        <RosGetD param="move_into/overshoot" target="{overshoot}" default="0.0" />
+        <RosGetVecD param="move_into/world_off" target="{world_off}" default="0.0;0.0;0.0" />
+        <ConfigMoveInto obj_transform="{food_frame}" action="{action}" overshoot="{overshoot}" world_off="{world_off}" offset="{approach}" />
+        <AcquisitionUnpackAction action="{action}" pre_force="{force}" pre_torque="{torque}" is_pre_manip="{pre_manip}"/>
+        <SetFTThreshold force="{force}" torque="{torque}" />
+        <!-- FT Sensor Trip is Okay -->
+        <AdaPlanToPoseOffset name="PlanOffsetInto" offset="{approach}" rotation="0.0;0.0;0.0" worldCollision="{TRUE}" traj="{traj}" />
+        <!-- TODO: PlanToOffset isn't as accurate -->
+        <ForceSuccess _skipIf="pre_manip==true"><AdaExecuteTrajectory name="MoveInto" traj="{traj}" /></ForceSuccess>
+
+        <!-- Move Within -->
+        <RosGetParam param="move_within/vf_params" target="{vf_params}" />
+        <AdaSetVFParams vfparam="{vf_params}" />
+        <RosGetD param="move_within/z_min" target="{z_min}" default="0.0" />
+        <ConfigTwist action="{action}" is_extraction="{FALSE}" approach="{approach}" z_min="{z_min}" obj_transform="{food_frame}" offset="{offset}" rotation="{rotation}" />
+        <AcquisitionUnpackAction action="{action}" grasp_force="{force}" grasp_torque="{torque}" />
+        <SetFTThreshold force="{force}" torque="{torque}" />
+        <!-- FT Sensor Trip is Okay -->
+        <AdaPlanToPoseOffset name="PlanTwistWithin" offset="{offset}" rotation="{rotation}" worldCollision="{TRUE}" traj="{traj}" />
+        <ForceSuccess><AdaExecuteTrajectory name="MoveWithin" traj="{traj}" /></ForceSuccess>
+
+        <!-- Move Out -->
+        <RosGetParam param="move_out/vf_params" target="{vf_params}" />
+        <AdaSetVFParams vfparam="{vf_params}" />
+        <RosGetD param="move_out/z_max" target="{z_max}" />
+        <ConfigTwist action="{action}" is_extraction="{TRUE}" approach="{approach}" z_max="{z_max}" obj_transform="{food_frame}" offset="{offset}" rotation="{rotation}" />
+        <AcquisitionUnpackAction action="{action}" ext_force="{force}" ext_torque="{torque}" />
+        <SetFTThreshold force="{force}" torque="{torque}" />
+        <AdaPlanToPoseOffset name="PlanTwistOut" offset="{offset}" rotation="{rotation}" worldCollision="{TRUE}" traj="{traj}" />
+        <AdaExecuteTrajectory name="MoveOut" traj="{traj}" />
+
+        <!-- Check Acquisition -->
+        <RosSubBool topic="check_acquire" target="{acquired}" />
+        <SetFTThreshold preset="standard" retare="true" />
+        <Failure _successIf="acquired==true" />
+      </Sequence>
+    </RetryUntilSuccessful>
+  </BehaviorTree>
+</root>

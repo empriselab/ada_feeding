@@ -1,0 +1,80 @@
+<root BTCPP_format="4" main_tree_to_execute = "Root" >
+  <!-- Subtree Includes -->
+  <include path="./feeding/helpers.xml" />
+  <include path="./feeding/acquisition.xml" />
+  <include path="./feeding/transfer.xml" />
+
+  <!-- Watchdog -->
+  <BehaviorTree ID="Root">
+    <ReactiveSequence>
+      <CheckWatchdog />
+      <SubTree ID="Meal"/>
+    </ReactiveSequence>
+  </BehaviorTree>
+
+  <!-- Main Meal Sequence -->
+  <BehaviorTree ID="Meal">
+    <Sequence name="MealSeq">
+      <!-- Scripting constants -->
+      <Script code=" TRUE:=true; FALSE:=false " />
+      <Script code=" X:=0; Y:=1; Z:=2; PI:=3.1415926535 " />
+
+      <!-- Setup Workspace -->
+      <SubTree ID="ParamToWorld" obj_name="wheelchair" /> 
+      <SubTree ID="ParamToWorld" obj_name="table" /> 
+      <SubTree ID="ParamToWorld" obj_name="plate" />
+
+      <!-- Setup ADA -->
+      <RosGetVecD param="velocityLimits/standard" target="{vel_standard}" />
+      <AdaSetLimits velocity="{vel_standard}" />
+
+      <Talk say="Hello! My name is Ayduh, it's a pleasure to serve you today!" />
+
+      <!-- Bite Sequence -->
+      <Repeat num_cycles="-1">
+      <Sequence name="BiteSeq">
+        <!-- Init FT Sensor -->
+        <SetFTThreshold preset="standard" />
+
+        <!-- Move Above Plate -->
+        <RosGetVecD param="configs/wheelchair/above_plate" target="{config}" />
+        <SubTree ID="MoveToConfig" config="{config}" worldCollision="{TRUE}" />
+        
+        <!-- Request Food -->
+        <Talk say="What food would you like?" />
+        <RosSubString topic="food_request" target="{food_name}" />
+        <Script code=" statement := 'One '+food_name+' coming right up!'" />
+        <Talk say="{statement}" />
+
+        <!-- Failure Just Restarts -->
+        <ForceSuccess>
+        <Sequence name="FeedBite">
+          <!-- First Food Detection -->
+          <Fallback>
+            <RetryUntilSuccessful num_attempts="2">
+              <PerceiveFood name_filter="{food_name}" timeout="3" objects="{foods}" />
+            </RetryUntilSuccessful>
+            <ForceFailure>
+              <Talk say="Sorry. I can't see that." />
+            </ForceFailure>
+          </Fallback>
+
+          <!-- Rank Foods Based on Distance to Fork -->
+          <RankDistance objects="{foods}" output="{food}" />
+
+          <!-- Default Action -->
+          <AcquisitionDefaultAction target="{action}" />
+
+          <!-- Acquisition -->
+          <SubTree ID="BiteAcquisition" food_name="{food_name}" food="{food}" action="{action}" />
+        
+          <!-- Transfer -->
+          <SubTree ID="BiteTransfer" />
+
+        </Sequence>
+        </ForceSuccess>
+      </Sequence>
+      </Repeat>
+    </Sequence>
+  </BehaviorTree>
+</root>
