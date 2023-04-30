@@ -19,7 +19,7 @@ class SimFoodDetector(PoseEstimator):
         # Pose at which the food is on the plate
         pose1 = np.array([[1, 0, 0, 0.30],
                           [0, 1, 0, -0.35],
-                          [0, 0, 1, 0.18],
+                          [0, 0, 1, 0.22],
                           [0, 0, 0, 1]])
         self.item1 = DetectedItem(
             frame_id=frame_id,
@@ -31,9 +31,9 @@ class SimFoodDetector(PoseEstimator):
             info_map=dict(action="tilted-vertical", rotation=0.0, score=1.0, annotation='tv'))
 
         # Pose at which the food is on the plate
-        pose2 = np.array([[1, 0, 0, 0.25],
-                          [0, 1, 0, -0.39],
-                          [0, 0, 1, 0.18],
+        pose2 = np.array([[1, 0, 0, 0.15],
+                          [0, 1, 0, -0.29],
+                          [0, 0, 1, 0.22],
                           [0, 0, 0, 1]])
         self.item2 = DetectedItem(
             frame_id=frame_id,
@@ -42,7 +42,7 @@ class SimFoodDetector(PoseEstimator):
             db_key="food_item",
             pose=pose2,
             detected_time=rospy.Time.now(),
-            info_map=dict(action="vertical", rotation=90.0, score=1.0))
+            info_map=dict(action="vertical", rotation=0.0, score=1.0))
 
     def detect_objects(self):
         self.item1.detected_time = rospy.Time.now()

@@ -1,0 +1,140 @@
+ BT::NodeStatus tick() override {
+    std::cout << "Moving into object\n";
+    // Input arguments
+    auto offInput = getInput<std::vector<double>>("world_off");
+    Eigen::Vector3d eOff = offInput ? Eigen::Vector3d(offInput.value().data())
+                                    : Eigen::Vector3d::Zero();
+    auto rotInput = getInput<std::vector<double>>("world_rot");
+    Eigen::Vector3d eRot = rotInput ? Eigen::Vector3d(rotInput.value().data())
+                                    : Eigen::Vector3d::Zero();
+
+    Eigen::Isometry3d eeTransform =
+        mAda->getEndEffectorBodyNode()->getWorldTransform();
+
+    Eigen::Vector3d actionRotation;
+    Eigen::Vector3d actionOffset;
+    Eigen::Vector3d pre_offset;
+    Eigen::Vector3d translation;
+    double actionDuration;
+
+    // If action provided, add twist from there
+    auto actionInput = getInput<AcquisitionAction>("action");
+    auto extractionInput = getInput<bool>("is_extraction");
+
+    if (actionInput) {
+      // Unpack action params
+      auto action = actionInput.value();
+      actionDuration = (extractionInput && extractionInput.value())
+                                  ? action.ext_duration
+                                  : action.grasp_duration;
+      actionRotation =
+          actionDuration * ((extractionInput && extractionInput.value())
+                                ? action.ext_rot
+                                : action.grasp_rot);
+      actionOffset =
+          actionDuration * ((extractionInput && extractionInput.value())
+                                ? action.ext_offset
+                                : action.grasp_offset);
+
+      pre_offset = action.pre_offset;
+      translation = action.pre_transform.translation();
+    }else{ //otherwise, use params provided by node
+      actionRotation = getInput<Eigen::Vector3d>("rotation");
+      actionOffset = getInput<Eigen::Vector3d>("offset");
+      pre_offset = getInput<Eigen::Vector3d>("pre_offset");
+      translation = getInput<Eigen::Vector3d>("translation");
+    }
+
+
+      // Calculate offset
+      // Tranform rotation to world frame from EE/utensil frame
+      eRot += eeTransform.linear() * actionRotation;
+
+      // Transform offset to world frame from "approach" frame
+      // If not provided, impute approach vec from action
+      auto approachInput = getInput<std::vector<double>>("approach");
+      Eigen::Vector3d approachVec =
+          approachInput
+              ? Eigen::Vector3d(approachInput.value().data())
+              : pre_offset - translation;
+      // Address vertical cases:
+      // If vertical: default to +Y utensil frame (i.e. flat of fork)
+      // If utensil flat (i.e. +Y is also vertical): default to +Z utensil frame
+      if (FuzzyZero(approachVec[1]) && FuzzyZero(approachVec[0])) {
+        approachVec = eeTransform.linear() * Eigen::Vector3d::UnitY();
+      }
+      if (FuzzyZero(approachVec[1]) && FuzzyZero(approachVec[0])) {
+        approachVec = eeTransform.linear() * Eigen::Vector3d::UnitZ();
+      }
+      eOff += Eigen::AngleAxisd(atan2(approachVec[1], approachVec[0]),
+                                Eigen::Vector3d::UnitZ()) *
+              actionOffset;
+    }
+
+    // Clamp Z
+    // if object provided, z relative to object
+    auto objectInput = getInput<Eigen::Isometry3d>("obj_transform");
+    double objOffset =
+        objectInput ? objectInput.value().translation().z() : 0.0;
+    double zHeight = eeTransform.translation().z() + eOff.z();
+    if (eOff.z() > 0 && !FuzzyZero(eOff.z())) {
+      double zMax =
+          getInput<double>("z_max")
+              ? std::min(getInput<double>("z_max").value() + objOffset, zHeight)
+              : zHeight;
+      double length =
+          std::max(0.0, (zMax - eeTransform.translation().z()) / eOff.z());
+      eOff *= length;
+    }
+    if (eOff.z() < 0 && !FuzzyZero(eOff.z())) {
+      double zMin =
+          getInput<double>("z_min")
+              ? std::max(getInput<double>("z_min").value() + objOffset, zHeight)
+              : zHeight;
+      double length =
+          std::max(0.0, (zMin - eeTransform.translation().z()) / eOff.z());
+      eOff *= length;
+    }
+    std::cout<<"eRot original: ";
+    std::cout << eRot;
+
+    if (actionInput){
+      auto action = actionInput.value();
+      if (action.action_type.compare("pre_manip") == 0){
+        eOff = (extractionInput && extractionInput.value())
+                                  ? action.ext_offset
+                                  : action.grasp_offset;
+        eRot = (extractionInput && extractionInput.value())
+                                  ? action.ext_rot
+                                  : action.grasp_rot;
+      }
+        
+    }
+    std::cout<<"\neRot new: ";
+    std::cout << eRot;
+
+    std::vector<double> offset{eOff.x(), eOff.y(), eOff.z()};
+    std::vector<double> rotation{eRot.x(), eRot.y(), eRot.z()};
+
+    setOutput("offset", offset);
+    setOutput("rotation", rotation);
+    setOutput("null_motion", FuzzyZero(eOff.norm()) && FuzzyZero(eRot.norm()));
+    return BT::NodeStatus::SUCCESS;
+  }
+
+private:
+  ada::Ada *mAda;
+  ros::NodeHandle *mNode;
+};
+
+/// Node registration
+static void registerNodes(BT::BehaviorTreeFactory &factory, ros::NodeHandle &nh,
+                          ada::Ada &robot) {
+  factory.registerNodeType<ConfigMoveAbove>("ConfigMoveAbove", &robot, &nh);
+  factory.registerNodeType<ConfigMoveInto>("ConfigMoveInto", &robot, &nh);
+  factory.registerNodeType<ConfigTwist>("ConfigTwist", &robot, &nh);
+  factory.registerNodeType<ConfigJoints>("ConfigJoints", &robot, &nh);
+}
+static_block { feeding::registerNodeFn(&registerNodes); }
+
+} // end namespace nodes

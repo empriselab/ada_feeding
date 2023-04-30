@@ -1,0 +1,76 @@
+<root BTCPP_format="4">  
+
+  <include path="./helpers.xml"/>
+
+  <!-- wiggle fork to separate food -->
+  <BehaviorTree ID="Wiggle">
+    <Sequence >
+        <RosSubI topic="action_select" target="{action_idx}" />
+        <Sequence _skipIf="action_idx!=22">
+          
+          <!-- move slightly above plate -->
+          <RosGetVecD param="pre_manip/cut_height" target="{cut_height}"/>
+          <ConfigTwist man_rotation="0.0;0.0;0.0" man_offset="{cut_height}" offset="{offset}" rotation="{rotation}"  />
+          <AdaPlanToPoseOffset name="PlanMoveUp" offset="{offset}" rotation="{rotation}" worldCollision="{FALSE}" traj="{traj}" />
+          <ForceSuccess><AdaExecuteTrajectory name="MoveUp" traj="{traj}" /></ForceSuccess>
+          <!-- <AdaPlanToOffset name="PlanMoveAbove" offset="0;0;cut_height" rotation="0.0;0.0;0.0" worldCollision="{TRUE}" traj="{traj}">
+          <ForceSuccess><AdaExecuteTrajectory name="MoveAbove" traj="{traj}" /></ForceSuccess> -->
+
+          <!-- <AdaPlanToPoseOffset name="Move" offset="0;0;0.01"  worldCollision="{TRUE}" traj="{traj}"/>
+          <AdaExecuteTrajectory name="MoveUp" traj="{traj}" /> -->
+          <!-- <ForceSuccess><SubTree ID="MoveToOffset" offset="0.0;0.0;0.0" worldCollision="{TRUE}"/></ForceSuccess>  -->
+
+          
+          
+          <!-- Wiggle fork -->
+          <RosGetD param="pre_manip/wiggle_angle" target="{wiggle_angle}" default="0.01"/>
+          <ConfigJoints name="ConfigWiggle" offset="{wiggle_angle}" config="{config}"/>
+          <ForceSuccess><SubTree ID="MoveToConfig" config="{config}" worldCollision="{FALSE}"/></ForceSuccess>
+
+          <ConfigJoints name="ConfigWiggle" offset="-1.57" config="{config}"/>
+          <ForceSuccess><SubTree ID="MoveToConfig" config="{config}" worldCollision="{FALSE}"/></ForceSuccess>
+
+
+          <!-- move fork left and right wrt fork frame -->
+          <!-- <ConfigTwist man_rotation="0.0;0.0;0.0" man_offset="0.0;-0.02;0.0" offset="{offset}" rotation="{rotation}"  />
+          <AdaPlanToPoseOffset name="PlanMoveUp" offset="{offset}" rotation="{rotation}" worldCollision="{FALSE}" traj="{traj}" />
+          <ForceSuccess><AdaExecuteTrajectory name="MoveUp" traj="{traj}" /></ForceSuccess>
+          
+          <ConfigTwist man_rotation="0.0;0.0;0.0" man_offset="0.0;0.04;0.0" offset="{offset}" rotation="{rotation}"  />
+          <AdaPlanToPoseOffset name="PlanMoveUp" offset="{offset}" rotation="{rotation}" worldCollision="{FALSE}" traj="{traj}" />
+          <ForceSuccess><AdaExecuteTrajectory name="MoveUp" traj="{traj}" /></ForceSuccess> -->
+        </Sequence>
+
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Twirl fork to scoop food -->
+  <BehaviorTree ID="Twirl">
+    <Sequence >
+        <RosSubI topic="action_select" target="{action_idx}" />
+        <Sequence _skipIf="action_idx!=23">
+
+          <RosGetD param="pre_manip/twirl_angle" target="{twirl_angle}" default="0.01"/>
+          <ConfigJoints name="ConfigTwirl" offset="{twirl_angle}" config="{config}"/>
+          <ForceSuccess><SubTree ID="MoveToConfig" config="{config}" worldCollision="{FALSE}"/></ForceSuccess>
+
+          <RosGetD param="pre_manip/twirl_angle" target="{twirl_angle}" default="0.01"/>
+          <ConfigJoints name="ConfigTwirl" offset="{twirl_angle}" config="{config}"/>
+          <ForceSuccess><SubTree ID="MoveToConfig" config="{config}" worldCollision="{FALSE}"/></ForceSuccess>
+        </Sequence>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Lift">
+    <Sequence >
+        <RosSubI topic="action_select" target="{action_idx}" />
+        <Sequence _skipIf="action_idx!=23">
+          <ConfigTwist man_rotation="0.0;0.0;0.0" man_offset="0;0;0.1" offset="{offset}" rotation="{rotation}"  />
+          <AdaPlanToPoseOffset name="PlanMoveUp" offset="{offset}" rotation="{rotation}" worldCollision="{FALSE}" traj="{traj}" />
+          <ForceSuccess><AdaExecuteTrajectory name="MoveUp" traj="{traj}" /></ForceSuccess>
+          
+        </Sequence>
+    </Sequence>
+  </BehaviorTree>
+
+</root>

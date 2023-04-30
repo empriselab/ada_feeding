@@ -171,6 +171,7 @@ private:
     Eigen::VectorXd eConfig = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(
         config.value().data(), config.value().size());
 
+
     mFuture = std::async(
         std::launch::async,
         [this](Eigen::VectorXd conf, aikido::constraint::TestablePtr testable) {
