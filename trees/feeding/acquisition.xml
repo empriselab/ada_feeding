@@ -10,12 +10,12 @@
 
       <!-- Setup Workspace -->
       <SubTree ID="ParamToWorld" obj_name="wheelchair" /> 
-      <!-- <SubTree ID="ParamToWorld" obj_name="table" /> 
-      <SubTree ID="ParamToWorld" obj_name="plate" /> -->
+      <SubTree ID="ParamToWorld" obj_name="table" /> 
+      <SubTree ID="ParamToWorld" obj_name="plate" />
 
       <!-- Give Velocity Headroom -->
       <RosGetVecD param="velocityLimits/standard" target="{vel_standard}" />
-      <AdaSetLimits velocity="{vel_standard}" />
+      <!-- <AdaSetLimits velocity="{vel_standard}" /> -->
       <AdaSetLimits velocity="3.0" acceleration="4.0"/>
 
       <!-- Move Above Plate -->
@@ -47,6 +47,9 @@
 
       <!-- Acquisition -->
       <SubTree ID="BiteAcquisition" food_name="{food_name}" food="{food}" action="{action}" index="{action_idx}"/>
+      
+      <RosGetVecD param="configs/wheelchair/above_plate" target="{config}" />
+      <SubTree ID="MoveToConfig" config="{config}" worldCollision="{TRUE}" />
     </Sequence>
   </BehaviorTree>
 
@@ -112,7 +115,7 @@
         <RosGetVecD param="move_into/world_off" target="{world_off}" default="0.0;0.0;0.0" />
         <ConfigMoveInto obj_transform="{food_frame}" action="{action}" overshoot="{overshoot}" world_off="{world_off}" offset="{approach}" />
         <AcquisitionUnpackAction action="{action}" pre_force="{force}" pre_torque="{torque}" is_pre_manip="{pre_manip}"/>
-        <!-- <SetFTThreshold force="{force}" torque="{torque}" /> -->
+        <SetFTThreshold force="{force}" torque="{torque}" />
         <!-- FT Sensor Trip is Okay -->
         <AdaPlanToPoseOffset name="PlanOffsetInto" offset="{approach}" rotation="0.0;0.0;0.0" worldCollision="{TRUE}" traj="{traj}" />
         <!-- TODO: PlanToOffset isn't as accurate -->
@@ -124,12 +127,18 @@
         <RosGetD param="move_within/z_min" target="{z_min}" default="0.0" />
         <ConfigTwist action="{action}" is_extraction="{FALSE}" approach="{approach}" z_min="{z_min}" obj_transform="{food_frame}" offset="{offset}" rotation="{rotation}" />
         <AcquisitionUnpackAction action="{action}" grasp_force="{force}" grasp_torque="{torque}" />
-        <!-- <SetFTThreshold force="{force}" torque="{torque}" /> -->
+        <SetFTThreshold force="{force}" torque="{torque}" />
         <!-- FT Sensor Trip is Okay -->
-        <AdaPlanToPoseOffset name="PlanTwistWithin" offset="{offset}" rotation="{rotation}" worldCollision="{TRUE}" traj="{traj}" />
+
+        <!-- Set velocity for pushing -->
+        <RosGetVecD param="velocityLimits/approach" target="{vel_approach}" />
+        <AdaSetLimits _skipIf="action_idx!=14||action_idx!=15||action_idx!=16||action_idx17" velocity="{vel_approach}" />
+
+
+        <AdaPlanToPoseOffset name="PlanTwistWithin" offset="{offset}" rotation="{rotation}" worldCollision="{False}" traj="{traj}" />
         <ForceSuccess><AdaExecuteTrajectory name="MoveWithin" traj="{traj}" /></ForceSuccess>
         
-        
+        <!-- Post-processing for pushing -->
         <RosSubI topic="action_select" target="{action_idx}" />
         <SubTree _skipIf="action_idx!=22" ID="Wiggle" approach="{approach}" z_min="{z_min}" index="{action_idx}"/>
         <SubTree _skipIf="action_idx!=23" ID="Twirl" approach="{approach}" z_min="{z_min}" index="{action_idx}"/>
@@ -138,12 +147,21 @@
         <!-- Move Out -->
         <RosGetParam param="move_out/vf_params" target="{vf_params}" />
         <AdaSetVFParams vfparam="{vf_params}" />
+
         <RosGetD param="move_out/z_max" target="{z_max}" />
+
+        <!-- Restore velocity from pushing -->
+        <RosGetVecD param="velocityLimits/flipping" target="{flipping}" />
+        <AdaSetLimits _skipIf="action_idx!=14||action_idx!=15||action_idx!=16||action_idx17" velocity="flipping" />
+
         <ConfigTwist action="{action}" is_extraction="{TRUE}" approach="{approach}" z_max="{z_max}" obj_transform="{food_frame}" offset="{offset}" rotation="{rotation}" />
         <AcquisitionUnpackAction action="{action}" ext_force="{force}" ext_torque="{torque}" />
-        <!-- <SetFTThreshold force="{force}" torque="{torque}" /> -->
+        <SetFTThreshold force="{force}" torque="{torque}" />
         <AdaPlanToPoseOffset name="PlanTwistOut" offset="{offset}" rotation="{rotation}" worldCollision="{TRUE}" traj="{traj}" />
-        <AdaExecuteTrajectory name="MoveOut" traj="{traj}" />
+        <ForceSuccess><AdaExecuteTrajectory name="MoveOut" traj="{traj}" /></ForceSuccess>
+
+        <RosGetVecD param="velocityLimits/standard" target="{vel_standard}" />
+        <AdaSetLimits velocity="{vel_standard}" />
 
         <SubTree _skipIf="action_idx!=23" ID="Twirl" approach="{approach}" z_min="{z_min}" index="{action_idx}"/>
         <SubTree _skipIf="action_idx!=23" ID="Lift" approach="{approach}" z_min="{z_min}" index="{action_idx}"/>

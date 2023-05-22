@@ -35,7 +35,10 @@
   <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster"
       args="0.0185 0.065 0.034 0.50080661  0.49902445  0.50068027 -0.49948635 end_effector_link camera_link" />
 
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="bottom_camera_link_broadcaster"
+    args="0.0122 -0.059  0.034 0.50080661  0.49902445  0.50068027 -0.49948635 end_effector_link bottom_camera_link" /> -->
+
   <node pkg="tf2_ros" type="static_transform_publisher" name="bottom_camera_link_broadcaster"
-    args="0.0122 -0.059  0.034 0.50080661  0.49902445  0.50068027 -0.49948635 end_effector_link bottom_camera_link" />
+    args="0.0122 -0.059  0.034 0.0011703, -0.0009343, -0.7068983, 0.7073136   end_effector_link bottom_camera_link" />
 
 </launch>

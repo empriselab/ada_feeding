@@ -101,26 +101,30 @@ public:
 
     // Output EE target pose
     Eigen::Vector3d ePos = eeTransform.translation();
+    std::vector<double> pos{ePos[0], ePos[1], ePos[2]};
 
-    
+  
+
+    Eigen::Quaterniond eQuat(eeTransform.linear());
+    std::vector<double> quat{eQuat.w(), eQuat.x(), eQuat.y(), eQuat.z()};
+
+    setOutput<std::vector<double>>("pos", pos);
+    setOutput<std::vector<double>>("quat", quat);
 
     // Modify start position if it's a premanipulation action
     if (actionInput.value().action_type.compare("pre_manip") == 0){
       Eigen::Vector3d offset = actionInput.value().pre_offset;
       distance = offset.lpNorm<Eigen::Infinity>();
-      std::cout << "Premanipulation action with distance" << distance; 
+      std::cout << "\n\n\nPremanipulation action with distance" << distance << "\n"; 
       Eigen::Vector3d tmp = (offset.array() * eeTransform.translation().normalized().array()).matrix();
-      std::vector<double> pos{tmp[0], tmp[1], tmp[2]};
-      setOutput<std::vector<double>>("pos", pos);
+      std::vector<double> pos2{tmp[0], tmp[1], tmp[2]};
+      for (double p : pos2){
+        std::cout << p << "\n";
+      }
+      setOutput<std::vector<double>>("pos", pos2);
     }else{
-      std::vector<double> pos{ePos[0], ePos[1], ePos[2]};
+      std::cout << "\n\n\nNot premanipulation action \n" ;
     }
-
-    Eigen::Quaterniond eQuat(eeTransform.linear());
-    std::vector<double> quat{eQuat.w(), eQuat.x(), eQuat.y(), eQuat.z()};
-
-    // setOutput<std::vector<double>>("pos", pos);
-    setOutput<std::vector<double>>("quat", quat);
 
     return BT::NodeStatus::SUCCESS;
   }
@@ -380,12 +384,15 @@ public:
     if (actionInput){
       auto action = actionInput.value();
       if (action.action_type.compare("pre_manip") == 0){
+        std::cout << "\n\n\nusing premanip action\n";
         eOff = (extractionInput && extractionInput.value())
                                   ? action.ext_offset
                                   : action.grasp_offset;
         eRot = (extractionInput && extractionInput.value())
                                   ? action.ext_rot
                                   : action.grasp_rot;
+      }else{
+        std::cout << "\n\n\n not using premanip action\n";
       }
         
     }

@@ -18,7 +18,10 @@ visualization:
 # Ada Node Params
 velocityLimits:
   standard: [0.6, 0.6, 0.6, 0.6, 0.6, 0.6]
-  approach: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
+  approach: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+  pushing: [0.05, 0.05, 0.05, 0.05, 0.05, 0.05]
+  flipping: [1.2, 1.2, 1.2, 1.2, 1.2, 1.2]
+  flipping: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 # FT Sensor Params
 ftSensor:
@@ -26,14 +29,14 @@ ftSensor:
   ftTopic: /forque/forqueSensor
   thresholds:
     standard:       # used when no other thresholds are specified
+      force: 2
+      torque: 2
+    grabFood:       # active when going down to grab the food
       force: 4
       torque: 4
-    grabFood:       # active when going down to grab the food
-      force: 15
-      torque: 2
     afterGrabFood:  # active when going up after food has been grabbed
-      force: 50
-      torque: 2
+      force: 4
+      torque: 4
 
 # Perception parameters
 perception:
@@ -65,7 +68,8 @@ workspace:
     quat: [1.0, 0.0, 0.0, 0.0]
   plate:
     urdf: package://pr_assets/data/objects/plate.urdf
-    pos: [0.24, -0.39, 0.153]
+    # pos: [0.24, -0.39, 0.153]
+    pos: [0.1, -0.35, 0.153]
     quat: [1.0, 0.0, 0.0, 0.0]
   table:
     urdf: package://pr_assets/data/furniture/emprise_table_feeding.urdf
@@ -97,7 +101,10 @@ configs:
     in_front_person: [0.10831513, 1.66342095, 1.31843917, 0.561769126, 1.826521969, 4.900448207]
 
     # Ready for Acquisition
-    above_plate: [-0.3351977053383868, 0.22778351363059665, -0.8636556846616443, 3.102966697771502, 1.9007481374180457, -1.7883164004137342]
+    # Make sure pre-manipulation actions work after roatating ee by 180 degrees.
+    # above_plate: [-0.3351977053383868, 0.22778351363059665, -0.8636556846616443, 3.102966697771502, 1.9007481374180457, -1.7883164004137342]
+    above_plate: [-0.3351977053383868, 0.22778351363059665, -0.8636556846616443, 3.102966697771502, 1.9007481374180457, 1.35327626]
+
 
 # # Acquisition Parameters
 # move_above:
@@ -130,14 +137,14 @@ move_into:
 move_within:
   vf_params: # Give it longer to plan
     timeout: 10.0
-  z_min: -0.02
+  z_min: -0.05
 move_out:
   vf_params: # Looser, we need this to succeed
     ang_tol: 0.03 
     pos_tol: 0.02
     timeout: 5.0
   z_max: 0.05
-  offset: [0.0, 0.0, 0.03]
+  offset: [0.0, 0.0, 0.06]
 
 pre_manip:
   cut_height: [0.0, 0.0, 0.0]
@@ -180,7 +187,6 @@ action_selection:
       ext_force: 50.0
       ext_torque: 4.0
     - # 2 Tilted Angled (TA90)
-      rotate_pref: 3.1415926535
       pre_pos: [-0.4949747468305832, 0.0, 0.6363961030678928]
       pre_quat: [0.1379497, 0.6935199, 0.6935199, 0.1379497]
       pre_offset: [0.0, 0.0, 0.0]
@@ -278,13 +284,13 @@ action_selection:
       grasp_offset: [0.01304032478472214,-0.010493497625805313,-0.03926755936500488]
       grasp_rot: [-0.10891105340951657,0.4170213172385573,0.3991582112365316]
       grasp_duration: 0.8100607395172118
-      grasp_force: 19.614996239832184
+      grasp_force: 10.614996239832184
       grasp_torque: 1.0
       #grasp_torque: 0.005195514731693099
       ext_offset: [-0.00279398103849407,-0.0009295186946551969,0.2436915569289975]
       ext_rot: [-1.4885864653567276,0.10789792956565336,0.20254261991547]
       ext_duration: 0.2499504089355469
-      ext_force: 50.0
+      ext_force: 20.0
       ext_torque: 4.0
     - ## 5 (TA90, Very Flat, "Side Cut"); NOTE: Pi Flip auto for MoveAbove
       pre_pos: [-0.09330950413838413,0.04739454310912268,0.07465685505482798]
@@ -318,7 +324,7 @@ action_selection:
       ext_offset: [-0.013164651728472393,-0.007261896907331424,0.07181258800809293]
       ext_rot: [-0.18746178568047966,0.07889404606065797,-0.049268574466059034]
       ext_duration: 0.7900252342224122
-      ext_force: 50.0
+      ext_force: 40.0
       ext_torque: 4.0
     - ## 7 (Clean VS0 w/ Angle Aproach)
       rotate_pref: 3.1415926535
@@ -392,33 +398,34 @@ action_selection:
       ext_force: 50.0
       ext_torque: 4.0
   # quaternions are in w x y z
+  # pre_pos and pre_quat parameterize move_above
   # offset represents the scale at which we move from the starting position
-  # pre_pos gives the unit vector from the food frame to start the action
+  # pre_pos gives the scale from the food frame to start the action
     - # 11 push left looking opposite the robot
       type: "pre_manip"
-      pre_pos: [0.1, 0.0, -0.07]
+      pre_pos: [0.1, 0.0, -0.05]
       pre_quat: [0.0, 0.7071068, -0.7071068, 0.0]
-      pre_offset: [0.05, 0.05, 0.093]
-      pre_force: 15.0
-      pre_torque: 40.0
-      grasp_offset:  [-0.07, 0.0, 0.0]
+      pre_offset: [0.05, 0.0, 0.093]
+      pre_force: 2
+      pre_torque: 2
+      grasp_offset:  [-0.30, 0.0, 0.0]
       grasp_rot: [0.0, 0.0, 0.0]
-      grasp_duration: 1.0
-      grasp_force: 15.0
-      grasp_torque: 40.0
+      grasp_duration: 100.0
+      grasp_force: 0.6
+      grasp_torque: 0.6
       ext_offset:  [0.0, 0.0, 0.1]
       ext_rot: [0.0, 0.0, 0.0]
       ext_duration: 1.5
-      ext_force: 50.0
-      ext_torque: 4.0
+      ext_force: 20
+      ext_torque: 2
     - # 12 push right looking opposite the robot
       type: "pre_manip"
-      pre_pos: [-0.1, 0.0, -0.07]
+      pre_pos: [-0.1, 0.0, -0.05]
       pre_quat: [0.0, 0.7071068, 0.7071068, 0.0]
-      pre_offset: [0.05, 0.05, 0.093]
+      pre_offset: [0.05, 0.0, 0.093]
       pre_force: 15.0
       pre_torque: 4.0
-      grasp_offset: [0.07, 0.0, 0.0]
+      grasp_offset: [0.09, 0.0, 0.0]
       grasp_rot: [0.0, 0.0, 0.0]
       grasp_duration: 0.0
       grasp_force: 15.0
@@ -430,12 +437,12 @@ action_selection:
       ext_torque: 4.0
     - # 13 push forward looking opposite the robot
       type: "pre_manip"
-      pre_pos: [0.0, 0.1, -0.07]
+      pre_pos: [0.0, 0.1, -0.05]
       pre_quat: [0.0, 1.0, 0.0, 0.0]
-      pre_offset: [0.05, 0.05, 0.093]
+      pre_offset: [0.0, 0.02, 0.093]
       pre_force: 15.0
       pre_torque: 4.0
-      grasp_offset: [0.0, -0.07, 0.0]
+      grasp_offset: [0.0, -0.09, 0.0]
       grasp_rot: [0.0, 0.0, 0.0]
       grasp_duration: 0.0
       grasp_force: 15.0
@@ -447,12 +454,12 @@ action_selection:
       ext_torque: 4.0
     - # 14 push backward looking opposite the robot
       type: "pre_manip"
-      pre_pos: [0.0, -0.1, -0.07]
+      pre_pos: [0.0, -0.1, -0.05]
       pre_quat: [0.0, 0.0, 1.0, 0.0]
-      pre_offset: [0.05, 0.05, 0.093]
+      pre_offset: [0.0, 0.04, 0.093]
       pre_force: 15.0
       pre_torque: 4.0
-      grasp_offset: [0.0, 0.07, 0.0]
+      grasp_offset: [0.0, 0.09, 0.0]
       grasp_rot: [0.0, 0.0, 0.0]
       grasp_duration: 0.0
       grasp_force: 15.0
@@ -462,10 +469,10 @@ action_selection:
       ext_duration: 1.0
       ext_force: 50.0
       ext_torque: 4.0
-    - # 15 flip from left to right looking opposite the robot
+    - # 15 flip from left to right looking opposite the robot - not very helpful since the robot will be in an awkward position positioning itself
       type: "pre_manip"
-      pre_pos: [0.1, 0.0, -0.07]
-      pre_quat: [0.0, 0.7071068, -0.7071068, 0.0]
+      pre_pos: [0.1, 0.0, -0.05]
+      pre_quat: [0.1830127, 0.6830127, -0.6830127, -0.1830127] #180, 60 90 in xyz angles
       pre_offset: [0.05, 0.05, 0.093]
       pre_force: 15.0
       pre_torque: 4.0
@@ -479,10 +486,10 @@ action_selection:
       ext_duration: 1.0
       ext_force: 50.0
       ext_torque: 4.0
-    - # 16 flip from right to left looking opposite the robot
+    - # 16 flip from right to left looking opposite the robot 
       type: "pre_manip"
-      pre_pos: [0.0, 0.1, -0.07]
-      pre_quat: [0.0, 0.7071068, 0.7071068, 0.0]
+      pre_pos: [0.0, 0.1, -0.01]
+      pre_quat: [0.1830127, 0.6830127, 0.6830127, 0.1830127] #180, -30 -90 in xyz angles
       pre_offset: [0.05, 0.05, 0.093]
       pre_force: 1500.0
       pre_torque: 400.0
@@ -498,8 +505,8 @@ action_selection:
       ext_torque: 4.0
     - # 17 flip forward looking opposite the robot 
       type: "pre_manip"
-      pre_pos: [0.0, 0.1, -0.07]
-      pre_quat: [-0.17, -0.98, 0.0, 0.0]
+      pre_pos: [0.0, 0.1, -0.01]
+      pre_quat: [0.5, 0.8660254, 0.0, 0.0] #120, 0, 0 in xyz angles
       pre_offset: [0.05, 0.05, 0.08]
       pre_force: 15.0
       pre_torque: 4.0
@@ -513,10 +520,10 @@ action_selection:
       ext_duration: 1.0
       ext_force: 50.0
       ext_torque: 4.0
-    - # 18 flip backward looking opposite the robot
+    - # 18 flip backward looking opposite the robot- not very helpful since the robot will be in an awkward position positioning itself
       type: "pre_manip"
-      pre_pos: [0.0, -0.1, -0.07]
-      pre_quat: [-0.17, 0.0, -0.98, 0.0]
+      pre_pos: [0.0, -0.1, -0.01]
+      pre_quat:  [0.0, 0.0, 0.8660254, 0.5]
       pre_offset: [0.05, 0.05, 0.08]
       pre_force: 15.0
       pre_torque: 4.0
@@ -532,7 +539,7 @@ action_selection:
       ext_torque: 4.0
     - # 19 cut
       type: "pre_manip"
-      pre_pos: [0.11, 0.0, 0.4]
+      pre_pos: [0.13, 0.0, 0.4]
       # pre_quat: [0.5, 0.5, -0.5, 0.5]
       pre_quat: [0.6087614, 0.0, 0.7933533, 0.0]
       pre_offset: [0.0, 0.0, 0.08]
@@ -550,9 +557,9 @@ action_selection:
       ext_torque: 4.0
     - # 20 twirl
       type: "pre_manip"
-      pre_pos: [0.0, 0.0, -0.08]
+      pre_pos: [0.0, 0.0, -0.05]
       pre_quat: [0.0, 0.0, 1.0, 0.0]
-      pre_offset: [0.0, 0.0, 0.050] # use pre_offset to adjust distance
+      pre_offset: [0.0, 0.0, 0.045] # use pre_offset to adjust distance. Lower means higher above plate
       pre_force: 15.0
       pre_torque: 4.0
       grasp_offset: [0.0, 0.0, 0.0]

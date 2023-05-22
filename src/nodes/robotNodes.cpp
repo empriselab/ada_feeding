@@ -8,6 +8,8 @@
 #include <functional>
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <ros/ros.h>
 
 #include <aikido/rviz.hpp>
 extern aikido::rviz::InteractiveMarkerViewerPtr gMarkerViewer;
@@ -171,6 +173,12 @@ private:
     Eigen::VectorXd eConfig = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(
         config.value().data(), config.value().size());
 
+    // aikido::trajectory::Spline val = mAda->getArm()->planToConfiguration(eConfig, constraint).reset(new aikido::trajectory::Spline);
+    //  plan_val = *plan;
+
+
+    
+        // move_until_touch_topic_joint_trajectory_controller/follow_joint_trajectory/feedback
 
     mFuture = std::async(
         std::launch::async,
