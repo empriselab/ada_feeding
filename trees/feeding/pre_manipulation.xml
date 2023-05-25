@@ -73,4 +73,47 @@
     </Sequence>
   </BehaviorTree>
 
+  <BehaviorTree ID="Postprocess_moveWithin">
+    <Sequence>
+       <RosSubI topic="action_select" target="{action_idx}" />
+
+       <!-- Set velocity for pushing -->
+      <RosGetVecD param="velocityLimits/pushing" target="{vel_pushing}" />
+      <AdaSetLimits _skipIf="action_idx-14<0 || action_idx-14>=5" name="Set pushing velocity" velocity="{vel_pushing}" />
+
+       <!-- Set velocity limits for flipping-->
+      <RosGetVecD param="velocityLimits/flipping" target="{flipping}" />
+      <RosGetVecD param="accelerationLimits/flipping" target="{flipping_accel}" />
+      <AdaSetLimits _skipIf="action_idx-17<0 || action_idx-17>=5" name="Set flipping velocity" velocity="flipping"  acceleration="flipping_accel"/>
+        
+        <!-- Twirling -->
+       <SubTree _skipIf="action_idx!=23" ID="Twirl" approach="{approach}" z_min="{z_min}" index="{action_idx}"/>
+       
+        <!-- Wiggling for cutting-->
+        <SubTree _skipIf="action_idx!=22" ID="Wiggle" approach="{approach}" z_min="{z_min}" index="{action_idx}"/>
+    </Sequence>
+
+  </BehaviorTree>
+
+  <BehaviorTree ID="Postprocess_moveOut">
+    <Sequence>
+
+      <RosSubI topic="action_select" target="{action_idx}" />
+
+        <!-- Restore velocity for pushing and twirling-->
+      <RosGetVecD param="velocityLimits/standard" target="{vel_standard}" />
+      <AdaSetLimits velocity="{vel_standard}"/>
+
+       <!-- No postprocessing for cutting-->
+
+       <!-- Postprocess twirling -->
+       <SubTree _skipIf="action_idx!=23" ID="Twirl" approach="{approach}" z_min="{z_min}" index="{action_idx}"/>
+      <SubTree _skipIf="action_idx!=23" ID="Lift" approach="{approach}" z_min="{z_min}" index="{action_idx}"/>
+
+    </Sequence>
+  </BehaviorTree>
+
+
+
+
 </root>
