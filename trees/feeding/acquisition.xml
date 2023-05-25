@@ -115,7 +115,7 @@
         <RosGetVecD param="move_into/world_off" target="{world_off}" default="0.0;0.0;0.0" />
         <ConfigMoveInto obj_transform="{food_frame}" action="{action}" overshoot="{overshoot}" world_off="{world_off}" offset="{approach}" />
         <AcquisitionUnpackAction action="{action}" pre_force="{force}" pre_torque="{torque}" is_pre_manip="{pre_manip}"/>
-        <SetFTThreshold force="{force}" torque="{torque}" />
+        <!-- <SetFTThreshold force="{force}" torque="{torque}" /> -->
         <!-- FT Sensor Trip is Okay -->
         <AdaPlanToPoseOffset name="PlanOffsetInto" offset="{approach}" rotation="0.0;0.0;0.0" worldCollision="{TRUE}" traj="{traj}" />
         <!-- TODO: PlanToOffset isn't as accurate -->
@@ -127,12 +127,12 @@
         <RosGetD param="move_within/z_min" target="{z_min}" default="0.0" />
         <ConfigTwist action="{action}" is_extraction="{FALSE}" approach="{approach}" z_min="{z_min}" obj_transform="{food_frame}" offset="{offset}" rotation="{rotation}" />
         <AcquisitionUnpackAction action="{action}" grasp_force="{force}" grasp_torque="{torque}" />
-        <SetFTThreshold force="{force}" torque="{torque}" />
+        <!-- <SetFTThreshold force="{force}" torque="{torque}" /> -->
         <!-- FT Sensor Trip is Okay -->
 
         <!-- Set velocity for pushing -->
-        <RosGetVecD param="velocityLimits/approach" target="{vel_approach}" />
-        <AdaSetLimits _skipIf="action_idx!=14||action_idx!=15||action_idx!=16||action_idx17" velocity="{vel_approach}" />
+        <!-- <RosGetVecD param="velocityLimits/approach" target="{vel_approach}" />
+        <AdaSetLimits  velocity="{vel_approach}" /> -->
 
 
         <AdaPlanToPoseOffset name="PlanTwistWithin" offset="{offset}" rotation="{rotation}" worldCollision="{False}" traj="{traj}" />
@@ -151,12 +151,12 @@
         <RosGetD param="move_out/z_max" target="{z_max}" />
 
         <!-- Restore velocity from pushing -->
-        <RosGetVecD param="velocityLimits/flipping" target="{flipping}" />
-        <AdaSetLimits _skipIf="action_idx!=14||action_idx!=15||action_idx!=16||action_idx17" velocity="flipping" />
+        <!-- <RosGetVecD param="velocityLimits/flipping" target="{flipping}" />
+        <AdaSetLimits velocity="flipping" /> -->
 
         <ConfigTwist action="{action}" is_extraction="{TRUE}" approach="{approach}" z_max="{z_max}" obj_transform="{food_frame}" offset="{offset}" rotation="{rotation}" />
         <AcquisitionUnpackAction action="{action}" ext_force="{force}" ext_torque="{torque}" />
-        <SetFTThreshold force="{force}" torque="{torque}" />
+        <!-- <SetFTThreshold force="{force}" torque="{torque}" /> -->
         <AdaPlanToPoseOffset name="PlanTwistOut" offset="{offset}" rotation="{rotation}" worldCollision="{TRUE}" traj="{traj}" />
         <ForceSuccess><AdaExecuteTrajectory name="MoveOut" traj="{traj}" /></ForceSuccess>
 
@@ -169,7 +169,7 @@
 
         <!-- Check Acquisition -->
         <RosSubBool topic="check_acquire" target="{acquired}" />
-        <SetFTThreshold preset="standard" retare="true" />
+        <!-- <SetFTThreshold preset="standard" retare="true" /> -->
         <Failure _successIf="acquired==true" />
       </Sequence>
     </RetryUntilSuccessful>

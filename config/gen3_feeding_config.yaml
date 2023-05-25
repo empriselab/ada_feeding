@@ -29,13 +29,13 @@ ftSensor:
   ftTopic: /forque/forqueSensor
   thresholds:
     standard:       # used when no other thresholds are specified
-      force: 2
+      force: 10
       torque: 2
     grabFood:       # active when going down to grab the food
-      force: 4
+      force: 10
       torque: 4
     afterGrabFood:  # active when going up after food has been grabbed
-      force: 4
+      force: 10
       torque: 4
 
 # Perception parameters
@@ -149,7 +149,7 @@ move_out:
 pre_manip:
   cut_height: [0.0, 0.0, 0.0]
   wiggle_angle: 0.785398
-  twirl_angle: -3.14
+  twirl_angle: 3.14
 
 # Acquistion Action Library
 action_selection:
@@ -408,11 +408,11 @@ action_selection:
       pre_offset: [0.05, 0.0, 0.093]
       pre_force: 2
       pre_torque: 2
-      grasp_offset:  [-0.30, 0.0, 0.0]
+      grasp_offset:  [-0.14, 0.0, 0.0]
       grasp_rot: [0.0, 0.0, 0.0]
       grasp_duration: 100.0
-      grasp_force: 0.6
-      grasp_torque: 0.6
+      grasp_force: 1.0
+      grasp_torque: 1.0
       ext_offset:  [0.0, 0.0, 0.1]
       ext_rot: [0.0, 0.0, 0.0]
       ext_duration: 1.5
@@ -425,7 +425,7 @@ action_selection:
       pre_offset: [0.05, 0.0, 0.093]
       pre_force: 15.0
       pre_torque: 4.0
-      grasp_offset: [0.09, 0.0, 0.0]
+      grasp_offset: [0.14, 0.0, 0.0]
       grasp_rot: [0.0, 0.0, 0.0]
       grasp_duration: 0.0
       grasp_force: 15.0
@@ -439,10 +439,10 @@ action_selection:
       type: "pre_manip"
       pre_pos: [0.0, 0.1, -0.05]
       pre_quat: [0.0, 1.0, 0.0, 0.0]
-      pre_offset: [0.0, 0.02, 0.093]
+      pre_offset: [0.0, 0.05, 0.093]
       pre_force: 15.0
       pre_torque: 4.0
-      grasp_offset: [0.0, -0.09, 0.0]
+      grasp_offset: [0.0, -0.14, 0.0]
       grasp_rot: [0.0, 0.0, 0.0]
       grasp_duration: 0.0
       grasp_force: 15.0
@@ -456,10 +456,10 @@ action_selection:
       type: "pre_manip"
       pre_pos: [0.0, -0.1, -0.05]
       pre_quat: [0.0, 0.0, 1.0, 0.0]
-      pre_offset: [0.0, 0.04, 0.093]
+      pre_offset: [0.0, 0.05, 0.093]
       pre_force: 15.0
       pre_torque: 4.0
-      grasp_offset: [0.0, 0.09, 0.0]
+      grasp_offset: [0.0, 0.14, 0.0]
       grasp_rot: [0.0, 0.0, 0.0]
       grasp_duration: 0.0
       grasp_force: 15.0
@@ -488,11 +488,11 @@ action_selection:
       ext_torque: 4.0
     - # 16 flip from right to left looking opposite the robot 
       type: "pre_manip"
-      pre_pos: [0.0, 0.1, -0.01]
+      pre_pos: [0.0, 0.1, -0.05]
       pre_quat: [0.1830127, 0.6830127, 0.6830127, 0.1830127] #180, -30 -90 in xyz angles
       pre_offset: [0.05, 0.05, 0.093]
-      pre_force: 1500.0
-      pre_torque: 400.0
+      pre_force: 5.0
+      pre_torque: 2.0
       grasp_offset:  [0.03, 0.0, 0.0]
       grasp_rot: [0.0, 0.0, 0.0]
       grasp_duration: 1.0
@@ -505,7 +505,7 @@ action_selection:
       ext_torque: 4.0
     - # 17 flip forward looking opposite the robot 
       type: "pre_manip"
-      pre_pos: [0.0, 0.1, -0.01]
+      pre_pos: [0.0, 0.1, -0.05]
       pre_quat: [0.5, 0.8660254, 0.0, 0.0] #120, 0, 0 in xyz angles
       pre_offset: [0.05, 0.05, 0.08]
       pre_force: 15.0
@@ -567,7 +567,7 @@ action_selection:
       grasp_duration: 0.0
       grasp_force: 15.0
       grasp_torque: 4.0
-      ext_offset: [0.0, -0.05, 0.03]
+      ext_offset: [0.0, -0.07, 0.03]
       ext_rot: [-1.1, 0.0, 0.0]
       ext_duration: 1.0
       ext_force: 50.0

@@ -82,7 +82,7 @@ Note that the current demo has only been tested on the JACO 2.
 2. Start up **ROS** and **Rviz**: `roscore` and `roslaunch ada_feeding rviz.launch`
 3. **Turn on and home ADA.** Once the lights on the joystick go solid, home ADA by holding the orange button until the robot stops moving.
 4. **Start the Camera**: `ssh nano` (you may need to add `nano` to your `.ssh/config`, this is the Nvidia Jetson Nano on the robot).
-    1. Once there, set your ROS Master using `usemaster <hostname>` (e.g. `usemaster weebo` or `usemaster ed209`)
+    1. Once there, set your ROS Master using `usemaster <hostname>` (e.g. `usemaster weebo` or `usemaster ed209`) 
     2. Execute `roslaunch realsense2_camera rs_aligned_depth.launch`  to start streaming RGBD data.
     3. *Note: SSH Key for Nano is available on secrets drive for convenient access*
     4. Check the image stream via Rviz (`/camera/color/image_raw/color`). If some area is too bright and look burnt or saturated, reduce the exposure.
