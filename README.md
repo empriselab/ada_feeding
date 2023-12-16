@@ -1,6 +1,6 @@
 # ADA Feeding Demo
 
-NOTE: this branch is derived from egordon/acquisition.
+NOTE: this branch is derived from egordon/acquisition: includes changes relevant to Gen3 Kinova arm.
 
 This package demonstrates the use of the [ADA robot](https://github.com/personalrobotics/libada) for robot-assisted feeding.
 
