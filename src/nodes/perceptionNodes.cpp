@@ -88,6 +88,11 @@ public:
       frame.linear() = objTransform.linear();
     }
 
+    Eigen::Quaterniond q(frame.linear());
+    std::cout<<"Set frame output: \n";
+    std::cout<<"Translation: "<<frame.translation()<<std::endl;
+    std::cout<<"Rotation: "<<q.w()<<" "<<q.vec()<<std::endl;
+
     setOutput<Eigen::Isometry3d>("frame", frame);
     return BT::NodeStatus::SUCCESS;
   }

@@ -52,12 +52,22 @@ public:
                                       : Eigen::Isometry3d::Identity());
     }
 
+    Eigen::Quaterniond ee_q(eeTransform.linear());
+    std::cout<<"eeTransform before update: \n";
+    std::cout<<"Translation: "<<eeTransform.translation()<<std::endl;
+    std::cout<<"Rotation: "<<ee_q.w()<<" "<<ee_q.vec()<<std::endl;
+
     // Origin is the food item
     auto objectInput = getInput<Eigen::Isometry3d>("obj_transform");
     if (!objectInput) {
       return BT::NodeStatus::FAILURE;
     }
     auto origin = objectInput.value();
+
+    Eigen::Quaterniond o_q(origin.linear());
+    std::cout<<"origin: \n";
+    std::cout<<"Translation: "<<origin.translation()<<std::endl;
+    std::cout<<"Rotation: "<<o_q.w()<<" "<<o_q.vec()<<std::endl;
 
     // Default normal yaw bounds
     auto yawAgnosticInput = getInput<bool>("yaw_agnostic");
@@ -102,6 +112,11 @@ public:
     std::vector<double> quat{eQuat.w(), eQuat.x(), eQuat.y(), eQuat.z()};
     setOutput<std::vector<double>>("pos", pos);
     setOutput<std::vector<double>>("quat", quat);
+
+    Eigen::Quaterniond ee_q2(eeTransform.linear());
+    std::cout<<"eeTransform after update: \n";
+    std::cout<<"Translation: "<<eeTransform.translation()<<std::endl;
+    std::cout<<"Rotation: "<<ee_q2.w()<<" "<<ee_q2.vec()<<std::endl;
 
     return BT::NodeStatus::SUCCESS;
   }
@@ -206,6 +221,7 @@ public:
       double actionDuration = (extractionInput && extractionInput.value())
                                   ? action.ext_duration
                                   : action.grasp_duration;
+      std::cout<<"actionDuration: "<<actionDuration<<std::endl;
       Eigen::Vector3d actionRotation =
           actionDuration * ((extractionInput && extractionInput.value())
                                 ? action.ext_rot

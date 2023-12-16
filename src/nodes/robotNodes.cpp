@@ -153,6 +153,8 @@ private:
       return true;
     }
 
+    std::cout<<"Planning using end effector: "<<mAda->getEndEffectorBodyNode()->getName()<<std::endl;
+
     mFuture = std::async(
         std::launch::async,
         [this](Eigen::Vector3d off, aikido::constraint::TestablePtr testable) {
@@ -244,6 +246,8 @@ private:
       gMarkerViewer->addTSRMarker(*tsr);
     }
 
+    std::cout<<"Planning using end effector: "<<mAda->getEndEffectorBodyNode()->getName()<<std::endl;
+
     mFuture = std::async(
         std::launch::async,
         [this](aikido::constraint::dart::TSRPtr tsr,
@@ -279,7 +283,10 @@ public:
   BT::NodeStatus onStart() override {
     auto traj = getInput<aikido::trajectory::TrajectoryPtr>("traj");
     if (!traj || !traj.value())
+    {
+      std::cout<<"Trajectory is empty. :("<<std::endl;
       return BT::NodeStatus::FAILURE;
+    }
 
     // TODO: this will draw from the end of the arm
     // This will NOT draw from the gripper
@@ -427,6 +434,24 @@ BT::NodeStatus setVFParams(BT::TreeNode &self, ada::Ada &robot) {
   return BT::NodeStatus::SUCCESS;
 }
 
+/// Controller Switching
+BT::NodeStatus switchControllerBiteTransfer(BT::TreeNode &self, ada::Ada &robot) {
+  robot.getArm()->activateExecutor("bite_transfer_executor");
+  return BT::NodeStatus::SUCCESS;
+}
+
+/// Controller Switching
+BT::NodeStatus switchControllerBiteTransport(BT::TreeNode &self, ada::Ada &robot) {
+  robot.getArm()->activateExecutor("effort_trajectory_executor");
+  return BT::NodeStatus::SUCCESS;
+}
+
+/// Controller Switching
+BT::NodeStatus switchControllerBiteAcquisition(BT::TreeNode &self, ada::Ada &robot) {
+  robot.getArm()->activateExecutor("velocity_trajectory_executor");
+  return BT::NodeStatus::SUCCESS;
+}
+
 /// Node registration
 static void registerNodes(BT::BehaviorTreeFactory &factory,
                           ros::NodeHandle & /*&nh */, ada::Ada &robot) {
@@ -459,6 +484,17 @@ static void registerNodes(BT::BehaviorTreeFactory &factory,
       "AdaSetVFParams",
       std::bind(setVFParams, std::placeholders::_1, std::ref(robot)),
       {BT::InputPort<XmlRpc::XmlRpcValue>("vfparam")});
+
+  factory.registerSimpleAction(
+      "SwitchControllerBiteTransfer",
+      std::bind(switchControllerBiteTransfer, std::placeholders::_1, std::ref(robot)));
+
+  factory.registerSimpleAction(
+      "SwitchControllerBiteAcquisition",
+      std::bind(switchControllerBiteAcquisition, std::placeholders::_1, std::ref(robot)));
+  factory.registerSimpleAction(
+      "SwitchControllerBiteTransport",
+      std::bind(switchControllerBiteTransport, std::placeholders::_1, std::ref(robot)));
 }
 static_block { feeding::registerNodeFn(&registerNodes); }
 
