@@ -1,5 +1,7 @@
 # ADA Feeding Demo
 
+NOTE: this branch is derived from egordon/acquisition.
+
 This package demonstrates the use of the [ADA robot](https://github.com/personalrobotics/libada) for robot-assisted feeding.
 
 It uses a [Behavior Tree](https://www.behaviortree.dev/) paradigm (v4.0).
