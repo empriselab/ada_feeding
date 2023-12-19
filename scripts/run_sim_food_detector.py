@@ -15,6 +15,8 @@ import numpy as np
 
 class SimFoodDetector(PoseEstimator):
     def __init__(self, frame_id):
+        self.rng = np.random.default_rng()
+        spanet_feature_length = 2048
 
         # Pose at which the food is on the plate
         pose1 = np.array([[1, 0, 0, 0],
@@ -28,8 +30,8 @@ class SimFoodDetector(PoseEstimator):
             db_key="food_item",
             pose=pose1,
             detected_time=rospy.Time.now(),
-            info_map=dict(action="tilted-vertical", rotation=0.0, score=1.0, annotation='tv'))
-        
+            info_map=dict(action="tilted-vertical", rotation=0.0, score=1.0, annotation='tv', features=self.rng.standard_normal(spanet_feature_length+1).tolist()))
+            # NOTE: +1 is for the "bias" term
         # Pose at which the food is on the plate
         pose2 = np.array([[1, 0, 0, 0.17],
                           [0, 1, 0, -0.37],
@@ -42,7 +44,7 @@ class SimFoodDetector(PoseEstimator):
             db_key="food_item",
             pose=pose2,
             detected_time=rospy.Time.now(),
-            info_map=dict(action="vertical", rotation=90.0, score=1.0))
+            info_map=dict(action="vertical", rotation=90.0, score=1.0, features=self.rng.standard_normal(spanet_feature_length+1).tolist()))
 
         # # Pose at which the food is on the plate
         # pose3 = np.array([[1, 0, 0, 0.2],
