@@ -33,7 +33,7 @@ class SimFoodDetector(PoseEstimator):
             info_map=dict(action="tilted-vertical", rotation=0.0, score=1.0, annotation='tv', features=self.rng.standard_normal(spanet_feature_length+1).tolist()))
             # NOTE: +1 is for the "bias" term
         # Pose at which the food is on the plate
-        pose2 = np.array([[1, 0, 0, 0.17],
+        pose2 = np.array([[1, 0, 0, 0.0],
                           [0, 1, 0, -0.37],
                           [0, 0, 1, 0.197],
                           [0, 0, 0, 1]])
