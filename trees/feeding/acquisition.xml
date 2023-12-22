@@ -137,11 +137,11 @@
         <!-- <SetFTThreshold preset="standard" retare="true" /> -->
 
         <!-- Move Infront of Person -->
-        <RosGetVecD param="configs/wheelchair/in_front_person" target="{config}" />
-        <SubTree ID="MoveToConfig" config="{config}" worldCollision="{TRUE}" />
+        <!-- <RosGetVecD param="configs/wheelchair/in_front_person" target="{config}" /> -->
+        <!-- <SubTree ID="MoveToConfig" config="{config}" worldCollision="{TRUE}" /> -->
 
         <!-- <SwitchControllerBiteTransfer/> -->
-        <RosSubBool topic="transfer_over" target="{transfer_over}" />
+        <!-- <RosSubBool topic="transfer_over" target="{transfer_over}" /> -->
 
         <Failure _successIf="acquired==true" />
       </Sequence>
